@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Design system & handoff artifacts (not part of the app)
+/Nexol Media Design System/
+/Nexol Media Design System.zip
+/Nexol Media Design System-handoff/
+/Assets/
+/Font/

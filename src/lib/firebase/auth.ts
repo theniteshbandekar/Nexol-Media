@@ -1,12 +1,12 @@
 import "server-only";
 
+import { cache } from "react";
 import { cookies } from "next/headers";
 
 import { getAdminAuth } from "./admin";
+import { SESSION_COOKIE } from "./session";
 
-// Firebase Hosting / App Hosting only forwards the `__session` cookie through
-// its cache, so the session cookie must use this exact name.
-export const SESSION_COOKIE = "__session";
+export { SESSION_COOKIE };
 
 export type UserRole = "admin" | "writer";
 
@@ -21,7 +21,7 @@ export type CurrentUser = {
  * session (no cookie, expired, revoked). Role comes from the custom claim,
  * which is the authoritative source of authorization.
  */
-export async function getCurrentUser(): Promise<CurrentUser | null> {
+export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   const session = (await cookies()).get(SESSION_COOKIE)?.value;
   if (!session) return null;
   try {
@@ -34,7 +34,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   } catch {
     return null;
   }
-}
+});
 
 export async function requireAdmin(): Promise<CurrentUser> {
   const user = await getCurrentUser();

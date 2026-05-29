@@ -1,11 +1,32 @@
 "use server";
 
 import { requireWriter } from "@/lib/firebase/auth";
-import { uploadImage } from "@/lib/firebase/storage";
+import { deleteImage, uploadImage } from "@/lib/firebase/storage";
 
 export type UploadResult =
   | { ok: true; src: string }
   | { ok: false; error: string };
+
+export type DeleteResult = { ok: true } | { ok: false; error: string };
+
+export async function deleteImageAction(path: string): Promise<DeleteResult> {
+  try {
+    await requireWriter();
+    if (!path) return { ok: false, error: "Missing path." };
+    await deleteImage(path);
+    return { ok: true };
+  } catch (err) {
+    console.error("[deleteImageAction]", err);
+    const unauthorized =
+      err instanceof Error && err.message.startsWith("Unauthorized");
+    return {
+      ok: false,
+      error: unauthorized
+        ? "You don't have permission to delete."
+        : "Delete failed. Please try again.",
+    };
+  }
+}
 
 // Accepts a FormData with `file`, `path` (e.g. images/caseStudies/<slug>), and
 // `alt`. Uploads via the Admin SDK and returns the tokenized download URL.

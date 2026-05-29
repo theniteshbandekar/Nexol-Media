@@ -18,9 +18,15 @@ const NAV: NavItem[] = [
   { href: "/admin/settings", label: "Settings", roles: ["admin"], ready: true },
   { href: "/admin/services", label: "Services", roles: ["admin"], ready: true },
   { href: "/admin/case-studies", label: "Case Studies", roles: ["admin"], ready: true },
-  { href: "/admin/blog", label: "Blog", roles: ["admin", "writer"], ready: false },
-  { href: "/admin/authors", label: "Authors", roles: ["admin", "writer"], ready: false },
-  { href: "/admin/media", label: "Media", roles: ["admin", "writer"], ready: false },
+  { href: "/admin/blog", label: "Blog", roles: ["admin", "writer"], ready: true },
+  { href: "/admin/authors", label: "Authors", roles: ["admin", "writer"], ready: true },
+  { href: "/admin/media", label: "Media", roles: ["admin", "writer"], ready: true },
+  { href: "/admin/bookings", label: "Bookings", roles: ["admin"], ready: true },
+  { href: "/admin/pages/services-index", label: "Services page", roles: ["admin"], ready: true },
+  { href: "/admin/pages/case-studies-index", label: "Case studies page", roles: ["admin"], ready: true },
+  { href: "/admin/pages/privacy", label: "Privacy page", roles: ["admin"], ready: true },
+  { href: "/admin/pages/terms", label: "Terms page", roles: ["admin"], ready: true },
+  { href: "/admin/users", label: "Users", roles: ["admin"], ready: true },
 ];
 
 export default async function ProtectedAdminLayout({

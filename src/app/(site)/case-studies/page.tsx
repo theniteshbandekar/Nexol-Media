@@ -6,6 +6,7 @@ import { getAllCaseStudies, type CaseStudy } from "@/lib/case-studies";
 import { JsonLd } from "@/components/json-ld";
 import { RouteHidden } from "@/components/route-hidden";
 import { getSiteSettings } from "@/lib/sanity/site-settings";
+import { getCaseStudiesIndex } from "@/lib/sanity/index-pages";
 import { itemListSchema } from "@/lib/schema";
 
 export const metadata: Metadata = {
@@ -105,6 +106,7 @@ export default async function CaseStudiesPage() {
   }
 
   const caseStudies = await getAllCaseStudies();
+  const idx = await getCaseStudiesIndex();
   const publishedStudies = caseStudies.filter(
     (c) => !c.comingSoon && c.rows && c.rows.length > 0
   );
@@ -121,7 +123,9 @@ export default async function CaseStudiesPage() {
       <JsonLd schema={listSchema} />
       <header className="page-header">
         <h1 className="fade-up d1">
-          Here are some Nexol <span className="accent">stories</span> for you.
+          {idx.heading.before}
+          <span className="accent">{idx.heading.accent}</span>
+          {idx.heading.after}
         </h1>
       </header>
 

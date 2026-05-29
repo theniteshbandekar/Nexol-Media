@@ -17,7 +17,8 @@ import {
   insertEvent,
   isSlotFree,
 } from "@/lib/google-calendar";
-import { getSanityWriteClient } from "@/lib/sanity/client";
+import { getAdminDb } from "@/lib/firebase/admin";
+import { COLLECTIONS } from "@/lib/firebase/collections";
 
 export type AvailableSlot = { startISO: string; endISO: string };
 
@@ -210,26 +211,25 @@ export async function createBooking(
     };
   }
 
-  // Persist to Sanity admin if a write token is present — non-fatal on failure.
-  const writeClient = getSanityWriteClient();
-  if (writeClient) {
-    try {
-      await writeClient.create({
-        _type: "bookingRequest",
+  // Persist the booking to Firestore — non-fatal on failure. Firestore rejects
+  // `undefined`, so optional fields fall back to null / [].
+  try {
+    await getAdminDb()
+      .collection(COLLECTIONS.bookingRequests)
+      .add({
         bookedAt: new Date().toISOString(),
         startsAt: payload.startISO,
         endsAt: payload.endISO,
         name: payload.name.trim(),
         email: payload.email.trim().toLowerCase(),
-        services: payload.services?.length ? payload.services : undefined,
-        message: payload.message?.trim() || undefined,
-        meetLink: inserted.meetLink ?? undefined,
+        services: payload.services?.length ? payload.services : [],
+        message: payload.message?.trim() || null,
+        meetLink: inserted.meetLink ?? null,
         eventId: inserted.eventId,
         status: "confirmed",
       });
-    } catch (err) {
-      console.warn("[booking] Sanity write failed:", err);
-    }
+  } catch (err) {
+    console.warn("[booking] Firestore write failed:", err);
   }
 
   // Branded confirmation via Resend. Google also sends its own invite — this

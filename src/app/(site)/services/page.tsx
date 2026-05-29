@@ -5,6 +5,7 @@ import { getAllServices } from "@/lib/services";
 import { JsonLd } from "@/components/json-ld";
 import { RouteHidden } from "@/components/route-hidden";
 import { getSiteSettings } from "@/lib/sanity/site-settings";
+import { getServicesIndex } from "@/lib/sanity/index-pages";
 import { itemListSchema } from "@/lib/schema";
 
 import "./services.css";
@@ -70,6 +71,7 @@ export default async function ServicesPage() {
   }
 
   const services = await getAllServices();
+  const idx = await getServicesIndex();
   const listSchema = itemListSchema(
     "Nexol Media · Services",
     services.map((s) => ({
@@ -82,15 +84,12 @@ export default async function ServicesPage() {
     <div className="services-page">
       <JsonLd schema={listSchema} />
       <header className="services-head">
-        <p className="eyebrow fade-up">(02) What we do</p>
+        <p className="eyebrow fade-up">{idx.eyebrow}</p>
         <h1 className="fade-up d1">
-          Five services. One job<span className="accent-dot">.</span>
+          {idx.title}
+          <span className="accent-dot">.</span>
         </h1>
-        <p className="dek fade-up d2">
-          Growth does not happen by accident. We run a tight set of services for
-          Tech, AI and Design creators — each one chosen because it moves a
-          single number you care about.
-        </p>
+        <p className="dek fade-up d2">{idx.dek}</p>
         <div className="actions fade-up d3">
           <Link className="btn-primary" href="/contact">
             Send a brief
@@ -138,70 +137,33 @@ export default async function ServicesPage() {
 
       <section className="process-section" aria-label="How an engagement runs">
         <div className="head">
-          <h2>How an engagement runs.</h2>
-          <span className="meta">Default · 60-day window</span>
+          <h2>{idx.processHeading}</h2>
+          <span className="meta">{idx.processMeta}</span>
         </div>
         <div className="process-grid">
-          <div className="process-step">
-            <span className="num">(01)</span>
-            <span className="week">Week 01</span>
-            <h3>Learn the channel.</h3>
-            <p>
-              We watch the last 30 uploads, read every comment thread, and pull
-              the three patterns we can move first.
-            </p>
-          </div>
-          <div className="process-step">
-            <span className="num">(02)</span>
-            <span className="week">Week 02</span>
-            <h3>Ship the first batch.</h3>
-            <p>
-              Three videos delivered with our cut framework applied — same
-              scripts, rebuilt hooks, new thumbnails.
-            </p>
-          </div>
-          <div className="process-step">
-            <span className="num">(03)</span>
-            <span className="week">Weeks 03 – 08</span>
-            <h3>Iterate Fridays.</h3>
-            <p>
-              Every Friday we review what is working and what is not. We double
-              down, we cut what is not.
-            </p>
-          </div>
-          <div className="process-step">
-            <span className="num">(04)</span>
-            <span className="week">Day 60</span>
-            <h3>Renew or part.</h3>
-            <p>
-              We share a clean report against the numbers we set on day one.
-              Then we renew, evolve the scope, or part ways cleanly.
-            </p>
-          </div>
+          {idx.processSteps.map((step) => (
+            <div className="process-step" key={step.num}>
+              <span className="num">{step.num}</span>
+              <span className="week">{step.week}</span>
+              <h3>{step.title}</h3>
+              <p>{step.description}</p>
+            </div>
+          ))}
         </div>
       </section>
 
       <section className="trust-stats" aria-label="Trust signals">
-        <div>
-          <span className="num">150+</span>
-          <span className="label">Creators served</span>
-        </div>
-        <div>
-          <span className="num">60</span>
-          <span className="label">Day default window</span>
-        </div>
-        <div>
-          <span className="num">300k+</span>
-          <span className="label">Followers added</span>
-        </div>
+        {idx.trustStats.map((stat) => (
+          <div key={stat.label}>
+            <span className="num">{stat.num}</span>
+            <span className="label">{stat.label}</span>
+          </div>
+        ))}
       </section>
 
       <section className="cta-banner" aria-label="Get started">
-        <h2>Serious creators choose Nexol Media.</h2>
-        <p>
-          Send a brief or book a 30-minute call. A real person on our team
-          replies within one working day.
-        </p>
+        <h2>{idx.ctaHeading}</h2>
+        <p>{idx.ctaBody}</p>
         <div className="actions">
           <Link className="btn-primary btn-primary-lg" href="/contact">
             Send a brief

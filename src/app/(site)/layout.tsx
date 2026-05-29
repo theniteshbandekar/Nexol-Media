@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Manrope, Geist_Mono } from "next/font/google";
-import { draftMode } from "next/headers";
 import "../globals.css";
 
 import { LenisProvider } from "@/components/lenis-provider";
@@ -9,7 +8,6 @@ import { SiteFooter } from "@/components/site-footer";
 import { JsonLd } from "@/components/json-ld";
 import { Analytics } from "@/components/analytics";
 import { CookieConsent } from "@/components/cookie-consent";
-import { VisualEditingMount } from "@/components/visual-editing";
 import { organizationSchema, websiteSchema, SITE_TWITTER } from "@/lib/schema";
 import { getSiteSettings } from "@/lib/sanity/site-settings";
 import { filterByRouteVisibility } from "@/lib/nav";
@@ -101,7 +99,6 @@ export default async function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const settings = await getSiteSettings();
   const rv = settings.routeVisibility;
-  const { isEnabled: isDraftMode } = await draftMode();
   return (
     <html
       lang="en"
@@ -133,7 +130,6 @@ export default async function RootLayout({
         </LenisProvider>
         <CookieConsent />
         <Analytics />
-        {isDraftMode && <VisualEditingMount />}
       </body>
     </html>
   );

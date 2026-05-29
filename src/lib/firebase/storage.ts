@@ -38,3 +38,28 @@ export async function uploadImage(params: {
 
   return { src, alt: params.alt };
 }
+
+export type MediaItem = { path: string; src: string | null };
+
+/** List uploaded images under images/ with their tokenized download URLs. */
+export async function listImages(): Promise<MediaItem[]> {
+  const bucket = getAdminStorage().bucket();
+  const [files] = await bucket.getFiles({ prefix: "images/" });
+  return files
+    .filter((f) => !f.name.endsWith("/"))
+    .map((f) => {
+      const meta = f.metadata?.metadata as Record<string, string> | undefined;
+      const token = meta?.firebaseStorageDownloadTokens;
+      const src = token
+        ? `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(
+            f.name,
+          )}?alt=media&token=${token}`
+        : null;
+      return { path: f.name, src };
+    })
+    .sort((a, b) => a.path.localeCompare(b.path));
+}
+
+export async function deleteImage(path: string): Promise<void> {
+  await getAdminStorage().bucket().file(path).delete();
+}

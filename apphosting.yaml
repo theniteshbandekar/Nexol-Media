@@ -1,0 +1,6 @@
+# Firebase App Hosting configuration — minimal scaffold.
+# Full runConfig tuning, runtime env (NEXT_PUBLIC_* + booking/Resend vars), and
+# Secret Manager secrets (FIREBASE_SERVICE_ACCOUNT_KEY, GOOGLE_OAUTH_*, RESEND_*)
+# are wired in P10 (deploy + cutover). See plan.md §9.
+runConfig:
+  minInstances: 0

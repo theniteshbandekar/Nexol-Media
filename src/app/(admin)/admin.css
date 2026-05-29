@@ -171,3 +171,266 @@
 .admin-muted {
   color: var(--fg-muted);
 }
+
+/* ── Editors ─────────────────────────────────────────────────────────── */
+.adm-editor {
+  max-width: 760px;
+  padding-bottom: 96px;
+}
+.adm-editor > h1 {
+  font-size: 26px;
+  margin: 0 0 24px;
+}
+.adm-section {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 20px 22px;
+  margin-bottom: 20px;
+}
+.adm-section > h2 {
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-muted);
+  margin: 0 0 16px;
+}
+.adm-section-note {
+  font-size: 13px;
+  color: var(--fg-muted);
+  margin: -8px 0 16px;
+}
+
+.adm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 14px;
+}
+.adm-field label,
+.adm-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg);
+}
+.adm-hint {
+  font-size: 12px;
+  color: var(--fg-muted);
+  line-height: 1.4;
+}
+.adm-input {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 14px;
+  font-family: inherit;
+}
+.adm-textarea {
+  height: auto;
+  padding: 10px 12px;
+  line-height: 1.5;
+  resize: vertical;
+}
+.adm-input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.adm-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Toggle */
+.adm-toggle-field {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.adm-toggle-label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.adm-toggle {
+  flex: none;
+  width: 44px;
+  height: 26px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--border);
+  background: var(--gray-200);
+  position: relative;
+  cursor: pointer;
+  transition: background var(--dur-fast, 0.15s) ease;
+}
+.adm-toggle.on {
+  background: var(--accent);
+}
+.adm-toggle-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform var(--dur-fast, 0.15s) ease;
+}
+.adm-toggle.on .adm-toggle-knob {
+  transform: translateX(18px);
+}
+
+/* Repeater */
+.adm-repeater {
+  margin-bottom: 16px;
+}
+.adm-repeater-head {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 10px;
+}
+.adm-repeater-item {
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 14px;
+  margin-bottom: 10px;
+  background: var(--bg);
+}
+.adm-repeater-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.adm-repeater-idx {
+  font-size: 12px;
+  color: var(--fg-muted);
+  font-family: var(--font-mono, monospace);
+}
+.adm-repeater-controls {
+  display: flex;
+  gap: 4px;
+}
+.adm-repeater-controls button {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--bg-elev);
+  color: var(--fg);
+  cursor: pointer;
+  font-size: 13px;
+}
+.adm-repeater-controls button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.adm-repeater-remove {
+  color: var(--danger) !important;
+}
+.adm-add {
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--fg);
+  padding: 8px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.adm-add:hover {
+  background: var(--bg-elev);
+}
+
+/* Accent heading */
+.adm-accent {
+  margin-bottom: 16px;
+}
+.adm-accent-preview {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+.adm-accent-preview .accent {
+  color: var(--lime-600, var(--accent));
+}
+
+/* Save bar */
+.adm-savebar {
+  position: fixed;
+  bottom: 0;
+  left: 240px;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 40px;
+  background: var(--bg-elev);
+  border-top: 1px solid var(--border);
+  z-index: 10;
+}
+.adm-savebar-status {
+  font-size: 13px;
+}
+.adm-savebar-error {
+  color: var(--danger);
+}
+.adm-savebar-saved {
+  color: var(--lime-600, var(--accent));
+}
+.adm-savebar-dirty {
+  color: var(--fg-muted);
+}
+.adm-savebar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.adm-btn {
+  height: 38px;
+  padding: 0 20px;
+  border: none;
+  border-radius: var(--r-md);
+  background: var(--accent);
+  color: var(--accent-fg);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+.adm-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.adm-btn-ghost {
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 14px;
+  border-radius: var(--r-md);
+  color: var(--fg);
+  text-decoration: none;
+  font-size: 13px;
+}
+.adm-btn-ghost:hover {
+  background: var(--bg);
+}
+.adm-btn-danger {
+  height: 38px;
+  padding: 0 16px;
+  border: 1px solid var(--danger);
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--danger);
+  font-size: 13px;
+  cursor: pointer;
+}

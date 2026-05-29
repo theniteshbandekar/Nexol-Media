@@ -14,13 +14,13 @@ type NavItem = {
 // `ready: false` sections render as inert tiles until P5–P8 build them.
 const NAV: NavItem[] = [
   { href: "/admin", label: "Dashboard", roles: ["admin", "writer"], ready: true },
+  { href: "/admin/home", label: "Home page", roles: ["admin"], ready: true },
+  { href: "/admin/settings", label: "Settings", roles: ["admin"], ready: true },
+  { href: "/admin/services", label: "Services", roles: ["admin"], ready: false },
+  { href: "/admin/case-studies", label: "Case Studies", roles: ["admin"], ready: false },
   { href: "/admin/blog", label: "Blog", roles: ["admin", "writer"], ready: false },
   { href: "/admin/authors", label: "Authors", roles: ["admin", "writer"], ready: false },
   { href: "/admin/media", label: "Media", roles: ["admin", "writer"], ready: false },
-  { href: "/admin/case-studies", label: "Case Studies", roles: ["admin"], ready: false },
-  { href: "/admin/services", label: "Services", roles: ["admin"], ready: false },
-  { href: "/admin/home", label: "Home page", roles: ["admin"], ready: false },
-  { href: "/admin/settings", label: "Settings", roles: ["admin"], ready: false },
 ];
 
 export default async function ProtectedAdminLayout({

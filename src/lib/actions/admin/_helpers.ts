@@ -3,8 +3,14 @@ import { requireAdmin, requireWriter } from "@/lib/firebase/auth";
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
 function toError(err: unknown): string {
-  if (err instanceof Error && err.message.startsWith("Unauthorized")) {
-    return "You don't have permission to do that.";
+  if (err instanceof Error) {
+    if (err.message.startsWith("Unauthorized")) {
+      return "You don't have permission to do that.";
+    }
+    // Surface intentional validation messages to the editor.
+    if (err.message.startsWith("Validation: ")) {
+      return err.message.slice("Validation: ".length);
+    }
   }
   return "Something went wrong. Please try again.";
 }

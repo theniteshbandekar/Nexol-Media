@@ -434,3 +434,42 @@
   font-size: 13px;
   cursor: pointer;
 }
+
+/* List pages */
+.adm-list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.adm-list-head h1 {
+  font-size: 26px;
+  margin: 0;
+}
+.adm-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.adm-list-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--bg-elev);
+  text-decoration: none;
+  color: var(--fg);
+}
+.adm-list-row:hover {
+  border-color: var(--border-strong);
+}
+.adm-list-title {
+  font-weight: 600;
+  font-size: 15px;
+}
+.adm-list-meta {
+  font-size: 12px;
+  color: var(--fg-muted);
+}

@@ -35,12 +35,9 @@ export type ServiceWorkSample = {
   caseStudySlug?: string;
 };
 
-export type ServiceSlug =
-  | "personal-brand"
-  | "post-production"
-  | "podcast-distribution"
-  | "launch-videos"
-  | "clipping";
+// Relaxed to `string` so new services can be created from the admin dashboard
+// (the original 5 canonical slugs remain valid strings).
+export type ServiceSlug = string;
 
 /** A single Q+A on a service detail page — wired into FAQPage schema. */
 export type ServiceFaq = { q: string; a: string };

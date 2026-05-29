@@ -9,6 +9,7 @@ export function SaveBar({
   saving,
   status,
   onSave,
+  saveLabel = "Save",
   viewHref,
   onDelete,
   deleting,
@@ -17,6 +18,7 @@ export function SaveBar({
   saving: boolean;
   status: SaveStatus;
   onSave: () => void;
+  saveLabel?: string;
   viewHref?: string;
   onDelete?: () => void;
   deleting?: boolean;
@@ -58,7 +60,7 @@ export function SaveBar({
           onClick={onSave}
           disabled={!dirty || saving}
         >
-          {saving ? "Saving…" : "Save"}
+          {saving ? "Saving…" : saveLabel}
         </button>
       </div>
     </div>

@@ -59,6 +59,12 @@ function metadataFor(service: Service): { title: string; description: string } {
         description:
           "Polished feature videos for product launches, fundraises, and category announcements. Six-beat script structure. Fixed scope, 2–3 weeks, master plus vertical cutdown.",
       };
+    default:
+      // Services added via the admin dashboard derive SEO copy from their own fields.
+      return {
+        title: `${service.title} — Nexol Media`,
+        description: service.tagline || service.description,
+      };
   }
 }
 

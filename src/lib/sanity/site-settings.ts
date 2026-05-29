@@ -24,7 +24,7 @@ export type SiteSettings = {
   routeVisibility: Record<RouteKey, boolean>;
 };
 
-const FALLBACK: SiteSettings = {
+export const FALLBACK: SiteSettings = {
   primaryNav: [
     { label: "Services", href: "/services" },
     { label: "Case Studies", href: "/case-studies" },

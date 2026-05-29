@@ -56,7 +56,7 @@ export type HomePage = {
   hook: HomeHook;
 };
 
-const FALLBACK: HomePage = {
+export const FALLBACK: HomePage = {
   hero: {
     h1: { before: "Polished Videos. ", accent: "Real Growth.", after: "" },
     tagline:

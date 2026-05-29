@@ -12,6 +12,7 @@ import { CookieConsent } from "@/components/cookie-consent";
 import { VisualEditingMount } from "@/components/visual-editing";
 import { organizationSchema, websiteSchema, SITE_TWITTER } from "@/lib/schema";
 import { getSiteSettings } from "@/lib/sanity/site-settings";
+import { filterByRouteVisibility } from "@/lib/nav";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -99,6 +100,7 @@ export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const settings = await getSiteSettings();
+  const rv = settings.routeVisibility;
   const { isEnabled: isDraftMode } = await draftMode();
   return (
     <html
@@ -110,7 +112,7 @@ export default async function RootLayout({
         <JsonLd schema={[organizationSchema(), websiteSchema()]} />
         <LenisProvider>
           <SiteHeader
-            primaryNav={settings.primaryNav}
+            primaryNav={filterByRouteVisibility(settings.primaryNav, rv)}
             ctaLabel={settings.headerCtaLabel}
             ctaHref={settings.headerCtaHref}
           />
@@ -122,9 +124,9 @@ export default async function RootLayout({
           </main>
           <SiteFooter
             tagline={settings.footerTagline}
-            services={settings.footerServices}
-            company={settings.footerCompany}
-            connect={settings.footerConnect}
+            services={filterByRouteVisibility(settings.footerServices, rv)}
+            company={filterByRouteVisibility(settings.footerCompany, rv)}
+            connect={filterByRouteVisibility(settings.footerConnect, rv)}
             location={settings.footerLocation}
             rights={settings.footerRights}
           />

@@ -1,92 +1,135 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 
-import { PortableText, type PortableTextComponents } from "@portabletext/react";
-import type { LegalPage } from "@/lib/sanity/legal-pages";
+import type { LegalBlock, LegalPage } from "@/lib/sanity/legal-pages";
 
-const components: PortableTextComponents = {
-  block: {
-    h2: ({ children }) => (
-      <h2
-        style={{
-          margin: "40px 0 16px",
-          fontFamily: "var(--font-display)",
-          fontSize: "clamp(22px, 2.2vw, 28px)",
-          fontWeight: 600,
-          letterSpacing: "var(--ls-headline)",
-          color: "var(--fg)",
-        }}
-      >
-        {children}
-      </h2>
-    ),
-    h3: ({ children }) => (
-      <h3
-        style={{
-          margin: "24px 0 12px",
-          fontSize: 18,
-          fontWeight: 600,
-          color: "var(--fg)",
-        }}
-      >
-        {children}
-      </h3>
-    ),
-    normal: ({ children }) => (
-      <p style={{ margin: "16px 0", fontSize: 16, lineHeight: 1.6, color: "var(--gray-700)" }}>
-        {children}
-      </p>
-    ),
-  },
-  list: {
-    bullet: ({ children }) => (
-      <ul
-        style={{
-          margin: "16px 0 16px 22px",
-          padding: 0,
-          listStyle: "disc",
-          color: "var(--gray-700)",
-        }}
-      >
-        {children}
-      </ul>
-    ),
-  },
-  listItem: {
-    bullet: ({ children }) => (
-      <li style={{ margin: "6px 0", lineHeight: 1.6 }}>{children}</li>
-    ),
-  },
-  marks: {
-    strong: ({ children }) => (
-      <strong style={{ color: "var(--fg)", fontWeight: 600 }}>{children}</strong>
-    ),
-    em: ({ children }) => <em>{children}</em>,
-    link: ({ value, children }) => {
-      const href = (value as { href?: string } | undefined)?.href ?? "#";
-      const external = href.startsWith("http");
-      if (external) {
-        return (
+type LegalSpan = NonNullable<LegalBlock["children"]>[number];
+
+function renderSpan(
+  span: LegalSpan,
+  markDefs: LegalBlock["markDefs"],
+  key: string
+): ReactNode {
+  let node: ReactNode = span.text ?? "";
+  for (const mark of span.marks ?? []) {
+    if (mark === "strong") {
+      node = (
+        <strong style={{ color: "var(--fg)", fontWeight: 600 }}>{node}</strong>
+      );
+    } else if (mark === "em") {
+      node = <em>{node}</em>;
+    } else {
+      const href = markDefs?.find((d) => d._key === mark)?.href;
+      if (href) {
+        node = href.startsWith("http") ? (
           <a
             href={href}
             target="_blank"
             rel="noopener noreferrer"
             style={{ borderBottom: "1px solid var(--gray-300)" }}
           >
-            {children}
+            {node}
           </a>
+        ) : (
+          <Link href={href} style={{ borderBottom: "1px solid var(--gray-300)" }}>
+            {node}
+          </Link>
         );
       }
-      return (
-        <Link
-          href={href}
-          style={{ borderBottom: "1px solid var(--gray-300)" }}
+    }
+  }
+  return <span key={key}>{node}</span>;
+}
+
+function renderChildren(block: LegalBlock): ReactNode {
+  return (block.children ?? []).map((span, i) =>
+    renderSpan(span, block.markDefs, `${block._key ?? "b"}-${i}`)
+  );
+}
+
+// Minimal Portable-Text-style renderer for the LegalBlock shape: switch on
+// `style` (h2/h3/normal), group consecutive `listItem` blocks into ul/ol, and
+// apply strong/em/link marks. Styles mirror the previous @portabletext/react
+// component map so output is unchanged.
+function renderBlocks(blocks: LegalBlock[]): ReactNode[] {
+  const out: ReactNode[] = [];
+  let i = 0;
+  while (i < blocks.length) {
+    const block = blocks[i];
+    const li = block.listItem;
+
+    if (li === "bullet" || li === "number") {
+      const items: LegalBlock[] = [];
+      while (i < blocks.length && blocks[i].listItem === li) {
+        items.push(blocks[i]);
+        i++;
+      }
+      const liNodes = items.map((it, j) => (
+        <li key={it._key ?? `li-${j}`} style={{ margin: "6px 0", lineHeight: 1.6 }}>
+          {renderChildren(it)}
+        </li>
+      ));
+      const listStyle = {
+        margin: "16px 0 16px 22px",
+        padding: 0,
+        listStyle: li === "number" ? "decimal" : "disc",
+        color: "var(--gray-700)",
+      } as const;
+      out.push(
+        li === "number" ? (
+          <ol key={block._key ?? `list-${i}`} style={listStyle}>
+            {liNodes}
+          </ol>
+        ) : (
+          <ul key={block._key ?? `list-${i}`} style={listStyle}>
+            {liNodes}
+          </ul>
+        )
+      );
+      continue;
+    }
+
+    const key = block._key ?? `b-${i}`;
+    const children = renderChildren(block);
+    if (block.style === "h2") {
+      out.push(
+        <h2
+          key={key}
+          style={{
+            margin: "40px 0 16px",
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(22px, 2.2vw, 28px)",
+            fontWeight: 600,
+            letterSpacing: "var(--ls-headline)",
+            color: "var(--fg)",
+          }}
         >
           {children}
-        </Link>
+        </h2>
       );
-    },
-  },
-};
+    } else if (block.style === "h3") {
+      out.push(
+        <h3
+          key={key}
+          style={{ margin: "24px 0 12px", fontSize: 18, fontWeight: 600, color: "var(--fg)" }}
+        >
+          {children}
+        </h3>
+      );
+    } else {
+      out.push(
+        <p
+          key={key}
+          style={{ margin: "16px 0", fontSize: 16, lineHeight: 1.6, color: "var(--gray-700)" }}
+        >
+          {children}
+        </p>
+      );
+    }
+    i++;
+  }
+  return out;
+}
 
 export function LegalPageBody({ page }: { page: LegalPage }) {
   return (
@@ -153,7 +196,7 @@ export function LegalPageBody({ page }: { page: LegalPage }) {
       )}
       <div style={{ marginTop: 40 }}>
         {page.body.length > 0 ? (
-          <PortableText value={page.body} components={components} />
+          renderBlocks(page.body)
         ) : (
           <p style={{ color: "var(--fg-muted)", fontSize: 15 }}>
             Full policy content is being prepared in the admin.

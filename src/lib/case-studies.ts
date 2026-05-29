@@ -1,9 +1,5 @@
-import { getSanityClient } from "./sanity/client";
-import {
-  allCaseStudiesQuery,
-  caseStudyBySlugQuery,
-} from "./sanity/queries";
-import { transformCaseStudy } from "./sanity/transform";
+import { getAdminDb } from "./firebase/admin";
+import { COLLECTIONS } from "./firebase/collections";
 
 /** Headline fragment with an optional lime-underlined accent word/phrase. */
 export type AccentHeading = {
@@ -146,23 +142,25 @@ let cachedAll: CaseStudy[] | undefined;
 
 export async function getAllCaseStudies(): Promise<CaseStudy[]> {
   if (cachedAll) return cachedAll;
-  const client = getSanityClient();
-  if (!client) {
-    cachedAll = LEGACY_CASE_STUDIES;
-    return cachedAll;
-  }
   try {
-    const raw = await client.fetch<unknown[]>(allCaseStudiesQuery);
-    if (!raw || raw.length === 0) {
+    const snap = await getAdminDb().collection(COLLECTIONS.caseStudies).get();
+    if (snap.empty) {
       cachedAll = LEGACY_CASE_STUDIES;
       return cachedAll;
     }
-    cachedAll = (raw as Parameters<typeof transformCaseStudy>[0][]).map(
-      transformCaseStudy
-    );
+    cachedAll = snap.docs
+      .map((d) => d.data() as CaseStudy & { published?: boolean })
+      .filter((c) => c.published !== false)
+      .sort((a, b) => {
+        // Published first (comingSoon last), then newest publishedAt first.
+        const ac = a.comingSoon ? 1 : 0;
+        const bc = b.comingSoon ? 1 : 0;
+        if (ac !== bc) return ac - bc;
+        return (b.publishedAt ?? "").localeCompare(a.publishedAt ?? "");
+      });
     return cachedAll;
   } catch (err) {
-    console.warn("[case-studies] Sanity fetch failed; using legacy.", err);
+    console.warn("[case-studies] Firestore fetch failed; using legacy.", err);
     cachedAll = LEGACY_CASE_STUDIES;
     return cachedAll;
   }
@@ -171,20 +169,20 @@ export async function getAllCaseStudies(): Promise<CaseStudy[]> {
 export async function getCaseStudy(
   slug: string
 ): Promise<CaseStudy | undefined> {
-  const client = getSanityClient();
-  if (client) {
-    try {
-      const raw = await client.fetch<unknown>(caseStudyBySlugQuery, { slug });
-      if (raw)
-        return transformCaseStudy(
-          raw as Parameters<typeof transformCaseStudy>[0]
-        );
-    } catch (err) {
-      console.warn(
-        "[case-studies] getCaseStudy Sanity fetch failed; trying legacy.",
-        err
-      );
+  try {
+    const doc = await getAdminDb()
+      .collection(COLLECTIONS.caseStudies)
+      .doc(slug)
+      .get();
+    if (doc.exists) {
+      const data = doc.data() as CaseStudy & { published?: boolean };
+      return data.published === false ? undefined : data;
     }
+  } catch (err) {
+    console.warn(
+      "[case-studies] getCaseStudy Firestore fetch failed; trying legacy.",
+      err
+    );
   }
   return LEGACY_CASE_STUDIES.find((c) => c.slug === slug);
 }

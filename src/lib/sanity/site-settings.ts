@@ -1,5 +1,5 @@
-import { getSanityClient } from "./client";
-import { siteSettingsQuery } from "./queries";
+import { getAdminDb } from "@/lib/firebase/admin";
+import { COLLECTIONS, SINGLETON_IDS } from "@/lib/firebase/collections";
 
 export type RouteKey =
   | "blog"
@@ -79,15 +79,12 @@ let cached: SiteSettings | undefined;
 
 export async function getSiteSettings(): Promise<SiteSettings> {
   if (cached) return cached;
-  const client = getSanityClient();
-  if (!client) {
-    cached = FALLBACK;
-    return cached;
-  }
   try {
-    const raw = await client.fetch<Partial<SiteSettings> | null>(
-      siteSettingsQuery
-    );
+    const doc = await getAdminDb()
+      .collection(COLLECTIONS.singletons)
+      .doc(SINGLETON_IDS.siteSettings)
+      .get();
+    const raw = (doc.data() as Partial<SiteSettings> | undefined) ?? null;
     if (!raw) {
       cached = FALLBACK;
       return cached;
@@ -115,7 +112,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     };
     return cached;
   } catch (err) {
-    console.warn("[siteSettings] Sanity fetch failed; using fallback.", err);
+    console.warn("[siteSettings] Firestore fetch failed; using fallback.", err);
     cached = FALLBACK;
     return cached;
   }

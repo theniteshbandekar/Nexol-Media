@@ -1,6 +1,5 @@
-import { groq } from "next-sanity";
-
-import { getSanityClient } from "./client";
+import { getAdminDb } from "@/lib/firebase/admin";
+import { COLLECTIONS } from "@/lib/firebase/collections";
 
 export type LegalPageKind = "privacy" | "terms";
 
@@ -47,17 +46,15 @@ const FALLBACK: Record<LegalPageKind, LegalPage> = {
   },
 };
 
-const legalPageQuery = groq`*[_type == "legalPage" && kind == $kind][0]{
-  kind, title, intro, body, lastUpdated
-}`;
-
 export async function getLegalPage(
   kind: LegalPageKind
 ): Promise<LegalPage> {
-  const client = getSanityClient();
-  if (!client) return FALLBACK[kind];
   try {
-    const raw = await client.fetch<LegalPage | null>(legalPageQuery, { kind });
+    const doc = await getAdminDb()
+      .collection(COLLECTIONS.legalPages)
+      .doc(kind)
+      .get();
+    const raw = doc.data() as LegalPage | undefined;
     if (!raw) return FALLBACK[kind];
     return {
       kind: raw.kind,

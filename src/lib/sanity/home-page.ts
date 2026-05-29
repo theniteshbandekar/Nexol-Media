@@ -1,7 +1,7 @@
 import type { AccentHeading } from "@/lib/case-studies";
 
-import { getSanityClient } from "./client";
-import { homePageQuery } from "./queries";
+import { getAdminDb } from "@/lib/firebase/admin";
+import { COLLECTIONS, SINGLETON_IDS } from "@/lib/firebase/collections";
 
 export type HomeHero = {
   h1: AccentHeading;
@@ -126,13 +126,12 @@ let cached: HomePage | undefined;
 
 export async function getHomePage(): Promise<HomePage> {
   if (cached) return cached;
-  const client = getSanityClient();
-  if (!client) {
-    cached = FALLBACK;
-    return cached;
-  }
   try {
-    const raw = await client.fetch<Partial<HomePage> | null>(homePageQuery);
+    const doc = await getAdminDb()
+      .collection(COLLECTIONS.singletons)
+      .doc(SINGLETON_IDS.homePage)
+      .get();
+    const raw = (doc.data() as Partial<HomePage> | undefined) ?? null;
     if (!raw) {
       cached = FALLBACK;
       return cached;
@@ -153,7 +152,7 @@ export async function getHomePage(): Promise<HomePage> {
     };
     return cached;
   } catch (err) {
-    console.warn("[homePage] Sanity fetch failed; using fallback.", err);
+    console.warn("[homePage] Firestore fetch failed; using fallback.", err);
     cached = FALLBACK;
     return cached;
   }

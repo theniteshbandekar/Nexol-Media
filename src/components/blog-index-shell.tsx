@@ -7,10 +7,9 @@ import { useSearchParams } from "next/navigation";
 import {
   blogCategories,
   formatPostDate,
-  getCategoryCount,
   type BlogCategory,
-  type BlogPost,
-} from "@/lib/blog";
+} from "@/lib/blog-format";
+import type { BlogPost } from "@/lib/blog";
 
 const toneClasses = ["tone-a", "tone-b", "tone-c", "tone-d", "tone-e", "tone-f"];
 
@@ -89,6 +88,12 @@ export function BlogIndexShell({ posts }: { posts: BlogPost[] }) {
     setQuery("");
   };
 
+  const categoryCounts = useMemo<Record<string, number>>(() => {
+    const counts: Record<string, number> = { All: posts.length };
+    for (const p of posts) counts[p.category] = (counts[p.category] ?? 0) + 1;
+    return counts;
+  }, [posts]);
+
   return (
     <>
       <div className="blog-filters" aria-label="Filter and search">
@@ -102,7 +107,7 @@ export function BlogIndexShell({ posts }: { posts: BlogPost[] }) {
               onClick={() => setCategory(c)}
             >
               {c}
-              <span className="count">{getCategoryCount(c)}</span>
+              <span className="count">{categoryCounts[c] ?? 0}</span>
             </button>
           ))}
         </div>

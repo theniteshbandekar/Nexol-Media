@@ -1,21 +1,11 @@
-import { getSanityClient } from "./sanity/client";
-import {
-  allBlogPostsQuery,
-  blogPostBySlugQuery,
-  featuredPostQuery,
-} from "./sanity/queries";
-import { transformBlogPost } from "./sanity/transform";
+import { getAdminDb } from "./firebase/admin";
+import { COLLECTIONS } from "./firebase/collections";
+import type { BlogCategory, BlogPostCategory } from "./blog-format";
 
-export const blogCategories = [
-  "All",
-  "Growth",
-  "Editing",
-  "AI tools",
-  "Distribution",
-  "Behind the scenes",
-] as const;
-export type BlogCategory = (typeof blogCategories)[number];
-export type BlogPostCategory = Exclude<BlogCategory, "All">;
+// Client-safe helpers live in ./blog-format; re-exported here so server
+// importers keep using "@/lib/blog".
+export { blogCategories, formatPostDate, formatPostDateLong } from "./blog-format";
+export type { BlogCategory, BlogPostCategory } from "./blog-format";
 
 /**
  * Structured body blocks — render via a switch on `kind` so the renderer can
@@ -316,58 +306,42 @@ let cachedAll: BlogPost[] | undefined;
 
 export async function getAllBlogPosts(): Promise<BlogPost[]> {
   if (cachedAll) return cachedAll;
-  const client = getSanityClient();
-  if (!client) {
-    cachedAll = LEGACY_POSTS;
-    return cachedAll;
-  }
   try {
-    const raw = await client.fetch<unknown[]>(allBlogPostsQuery);
-    if (!raw || raw.length === 0) {
-      cachedAll = LEGACY_POSTS;
-      return cachedAll;
-    }
-    cachedAll = (raw as Parameters<typeof transformBlogPost>[0][]).map(
-      transformBlogPost
-    );
+    const snap = await getAdminDb().collection(COLLECTIONS.blogPosts).get();
+    // Empty collection → fall back to the legacy seed (migration safety).
+    // Non-empty → honor the published flag (may legitimately be empty).
+    cachedAll = snap.empty
+      ? LEGACY_POSTS
+      : snap.docs
+          .map((d) => d.data() as BlogPost & { published?: boolean })
+          .filter((p) => p.published !== false);
     return cachedAll;
   } catch (err) {
-    console.warn("[blog] Sanity fetch failed; using legacy seed.", err);
+    console.warn("[blog] Firestore fetch failed; using legacy seed.", err);
     cachedAll = LEGACY_POSTS;
     return cachedAll;
   }
 }
 
 export async function getPost(slug: string): Promise<BlogPost | undefined> {
-  const client = getSanityClient();
-  if (client) {
-    try {
-      const raw = await client.fetch<unknown>(blogPostBySlugQuery, { slug });
-      if (raw)
-        return transformBlogPost(
-          raw as Parameters<typeof transformBlogPost>[0]
-        );
-    } catch (err) {
-      console.warn("[blog] getPost Sanity fetch failed; trying legacy.", err);
+  try {
+    const doc = await getAdminDb()
+      .collection(COLLECTIONS.blogPosts)
+      .doc(slug)
+      .get();
+    if (doc.exists) {
+      const data = doc.data() as BlogPost & { published?: boolean };
+      return data.published === false ? undefined : data;
     }
+  } catch (err) {
+    console.warn("[blog] getPost Firestore fetch failed; trying legacy.", err);
   }
   return LEGACY_POSTS.find((p) => p.slug === slug);
 }
 
 export async function getFeaturedPost(): Promise<BlogPost | undefined> {
-  const client = getSanityClient();
-  if (client) {
-    try {
-      const raw = await client.fetch<unknown>(featuredPostQuery);
-      if (raw)
-        return transformBlogPost(
-          raw as Parameters<typeof transformBlogPost>[0]
-        );
-    } catch (err) {
-      console.warn("[blog] featured Sanity fetch failed; using legacy.", err);
-    }
-  }
-  return LEGACY_POSTS.find((p) => p.featured) ?? LEGACY_POSTS[0];
+  const all = await getAllBlogPosts();
+  return all.find((p) => p.featured) ?? all[0];
 }
 
 export async function getRecentPosts(count = 5): Promise<BlogPost[]> {
@@ -408,23 +382,4 @@ export async function getCategoryCount(
 
 function sortByDateDesc(posts: BlogPost[]): BlogPost[] {
   return [...posts].sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
-}
-
-export function formatPostDate(iso: string): string {
-  if (!iso) return "";
-  return new Date(iso + "T00:00:00Z").toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    timeZone: "UTC",
-  });
-}
-
-export function formatPostDateLong(iso: string): string {
-  if (!iso) return "";
-  return new Date(iso + "T00:00:00Z").toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  });
 }

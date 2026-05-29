@@ -1,6 +1,5 @@
-import { getSanityClient } from "./sanity/client";
-import { allServicesQuery, serviceBySlugQuery } from "./sanity/queries";
-import { transformService } from "./sanity/transform";
+import { getAdminDb } from "./firebase/admin";
+import { COLLECTIONS } from "./firebase/collections";
 
 /** One deliverable card on a service detail page. */
 export type ServiceDeliverable = {
@@ -627,43 +626,40 @@ let cachedAll: Service[] | undefined;
 
 export async function getAllServices(): Promise<Service[]> {
   if (cachedAll) return cachedAll;
-  const client = getSanityClient();
-  if (!client) {
-    cachedAll = LEGACY_SERVICES;
-    return cachedAll;
-  }
   try {
-    const raw = await client.fetch<unknown[]>(allServicesQuery);
-    if (!raw || raw.length === 0) {
+    const snap = await getAdminDb().collection(COLLECTIONS.services).get();
+    if (snap.empty) {
       cachedAll = LEGACY_SERVICES;
       return cachedAll;
     }
-    cachedAll = (raw as Parameters<typeof transformService>[0][]).map(
-      transformService
-    );
+    cachedAll = snap.docs
+      .map((d) => d.data() as Service & { published?: boolean })
+      .filter((s) => s.published !== false)
+      // Firestore default order is by slug (alphabetical) — sort by num.
+      .sort((a, b) => a.num.localeCompare(b.num));
     return cachedAll;
   } catch (err) {
-    console.warn("[services] Sanity fetch failed; using legacy.", err);
+    console.warn("[services] Firestore fetch failed; using legacy.", err);
     cachedAll = LEGACY_SERVICES;
     return cachedAll;
   }
 }
 
 export async function getService(slug: string): Promise<Service | undefined> {
-  const client = getSanityClient();
-  if (client) {
-    try {
-      const raw = await client.fetch<unknown>(serviceBySlugQuery, { slug });
-      if (raw)
-        return transformService(
-          raw as Parameters<typeof transformService>[0]
-        );
-    } catch (err) {
-      console.warn(
-        "[services] getService Sanity fetch failed; trying legacy.",
-        err
-      );
+  try {
+    const doc = await getAdminDb()
+      .collection(COLLECTIONS.services)
+      .doc(slug)
+      .get();
+    if (doc.exists) {
+      const data = doc.data() as Service & { published?: boolean };
+      return data.published === false ? undefined : data;
     }
+  } catch (err) {
+    console.warn(
+      "[services] getService Firestore fetch failed; trying legacy.",
+      err
+    );
   }
   return LEGACY_SERVICES.find((s) => s.slug === slug);
 }

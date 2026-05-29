@@ -1,6 +1,76 @@
-# Firebase App Hosting configuration — minimal scaffold.
-# Full runConfig tuning, runtime env (NEXT_PUBLIC_* + booking/Resend vars), and
-# Secret Manager secrets (FIREBASE_SERVICE_ACCOUNT_KEY, GOOGLE_OAUTH_*, RESEND_*)
-# are wired in P10 (deploy + cutover). See plan.md §9.
+# Firebase App Hosting configuration.
+# Non-secret config is inlined below as `value:`. Six sensitive values are pulled
+# from Secret Manager via `secret:` (created with `firebase apphosting:secrets:set`).
+# NEXT_PUBLIC_* must be available at BUILD (inlined into the client bundle) and
+# RUNTIME. FIREBASE_SERVICE_ACCOUNT_KEY is also needed at BUILD (generateStaticParams
+# reads Firestore via the Admin SDK during prerender). See plan.md §9, GO-LIVE C/D.
+
 runConfig:
-  minInstances: 0
+  cpu: 1
+  memoryMiB: 1024
+  minInstances: 0 # scale-to-zero (cheapest); bump to 1 to remove SSR cold starts
+  maxInstances: 100
+
+env:
+  # --- Public Firebase web config (safe to commit; shipped to the browser) ---
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: AIzaSyB5kWMOmRvejn3axcPka_9wLYb3vgq7Jq8
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: nexolmedia-2805e.firebaseapp.com
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: nexolmedia-2805e
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: nexolmedia-2805e.firebasestorage.app
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: "681869341585"
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: "1:681869341585:web:d719ba7025ae4da74b2030"
+    availability: [BUILD, RUNTIME]
+
+  # --- Analytics / Search Console (public) ---
+  - variable: NEXT_PUBLIC_GA_ID
+    value: G-MB3JDZG98F
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_GSC_VERIFICATION
+    value: GYfEeXtTQ3YbfGD4SpGAGVJR0QERphH_aGeLB-GqUqo
+    availability: [BUILD, RUNTIME]
+
+  # --- Booking / email (non-secret operational config; runtime only) ---
+  - variable: BOOKING_OPERATOR_EMAIL
+    value: theniteshbandekar@gmail.com
+    availability: [RUNTIME]
+  - variable: GOOGLE_CALENDAR_ID
+    value: primary
+    availability: [RUNTIME]
+  - variable: RESEND_FROM_ADDRESS
+    value: Nexol Media <noreply@nexolmedia.com>
+    availability: [RUNTIME]
+  - variable: RESEND_REPLY_TO
+    value: info@nexolmedia.com
+    availability: [RUNTIME]
+  - variable: RESEND_TO_ADDRESS
+    value: info@nexolmedia.com
+    availability: [RUNTIME]
+
+  # --- Secrets (Secret Manager; values never committed) ---
+  - variable: FIREBASE_SERVICE_ACCOUNT_KEY
+    secret: FIREBASE_SERVICE_ACCOUNT_KEY
+    availability: [BUILD, RUNTIME]
+  - variable: GOOGLE_OAUTH_CLIENT_ID
+    secret: GOOGLE_OAUTH_CLIENT_ID
+    availability: [RUNTIME]
+  - variable: GOOGLE_OAUTH_CLIENT_SECRET
+    secret: GOOGLE_OAUTH_CLIENT_SECRET
+    availability: [RUNTIME]
+  - variable: GOOGLE_OAUTH_REFRESH_TOKEN
+    secret: GOOGLE_OAUTH_REFRESH_TOKEN
+    availability: [RUNTIME]
+  # RESEND_API_KEY and RESEND_AUDIENCE_ID are intentionally omitted for now — they
+  # are empty in .env.local (Resend not configured yet). Referencing a versionless
+  # secret would fail the rollout. email.ts no-ops gracefully without them; add both
+  # as secrets here when Resend is set up (GO-LIVE Step H), then redeploy.

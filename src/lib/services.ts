@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { getAdminDb } from "./firebase/admin";
 import { COLLECTIONS } from "./firebase/collections";
 
@@ -622,44 +624,39 @@ const LEGACY_SERVICES: Service[] = [
 /** Migration script only. */
 export const __LEGACY_SERVICES = LEGACY_SERVICES;
 
-let cachedAll: Service[] | undefined;
-
-export async function getAllServices(): Promise<Service[]> {
-  if (cachedAll) return cachedAll;
+// React cache() = per-render dedup only, so revalidation always re-reads.
+export const getAllServices = cache(async (): Promise<Service[]> => {
   try {
     const snap = await getAdminDb().collection(COLLECTIONS.services).get();
-    if (snap.empty) {
-      cachedAll = LEGACY_SERVICES;
-      return cachedAll;
-    }
-    cachedAll = snap.docs
+    if (snap.empty) return LEGACY_SERVICES;
+    return snap.docs
       .map((d) => d.data() as Service & { published?: boolean })
       .filter((s) => s.published !== false)
       // Firestore default order is by slug (alphabetical) — sort by num.
       .sort((a, b) => a.num.localeCompare(b.num));
-    return cachedAll;
   } catch (err) {
     console.warn("[services] Firestore fetch failed; using legacy.", err);
-    cachedAll = LEGACY_SERVICES;
-    return cachedAll;
+    return LEGACY_SERVICES;
   }
-}
+});
 
-export async function getService(slug: string): Promise<Service | undefined> {
-  try {
-    const doc = await getAdminDb()
-      .collection(COLLECTIONS.services)
-      .doc(slug)
-      .get();
-    if (doc.exists) {
-      const data = doc.data() as Service & { published?: boolean };
-      return data.published === false ? undefined : data;
+export const getService = cache(
+  async (slug: string): Promise<Service | undefined> => {
+    try {
+      const doc = await getAdminDb()
+        .collection(COLLECTIONS.services)
+        .doc(slug)
+        .get();
+      if (doc.exists) {
+        const data = doc.data() as Service & { published?: boolean };
+        return data.published === false ? undefined : data;
+      }
+    } catch (err) {
+      console.warn(
+        "[services] getService Firestore fetch failed; trying legacy.",
+        err
+      );
     }
-  } catch (err) {
-    console.warn(
-      "[services] getService Firestore fetch failed; trying legacy.",
-      err
-    );
+    return LEGACY_SERVICES.find((s) => s.slug === slug);
   }
-  return LEGACY_SERVICES.find((s) => s.slug === slug);
-}
+);

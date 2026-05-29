@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { getAdminDb } from "@/lib/firebase/admin";
 import { COLLECTIONS } from "@/lib/firebase/collections";
 
@@ -46,9 +48,9 @@ const FALLBACK: Record<LegalPageKind, LegalPage> = {
   },
 };
 
-export async function getLegalPage(
+export const getLegalPage = cache(async (
   kind: LegalPageKind
-): Promise<LegalPage> {
+): Promise<LegalPage> => {
   try {
     const doc = await getAdminDb()
       .collection(COLLECTIONS.legalPages)
@@ -67,4 +69,4 @@ export async function getLegalPage(
     console.warn(`[legal] ${kind} fetch failed; using fallback.`, err);
     return FALLBACK[kind];
   }
-}
+});

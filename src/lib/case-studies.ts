@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { getAdminDb } from "./firebase/admin";
 import { COLLECTIONS } from "./firebase/collections";
 
@@ -138,17 +140,12 @@ const LEGACY_CASE_STUDIES: CaseStudy[] = [
 /** Migration script only. */
 export const __LEGACY_CASE_STUDIES = LEGACY_CASE_STUDIES;
 
-let cachedAll: CaseStudy[] | undefined;
-
-export async function getAllCaseStudies(): Promise<CaseStudy[]> {
-  if (cachedAll) return cachedAll;
+// React cache() = per-render dedup only, so revalidation always re-reads.
+export const getAllCaseStudies = cache(async (): Promise<CaseStudy[]> => {
   try {
     const snap = await getAdminDb().collection(COLLECTIONS.caseStudies).get();
-    if (snap.empty) {
-      cachedAll = LEGACY_CASE_STUDIES;
-      return cachedAll;
-    }
-    cachedAll = snap.docs
+    if (snap.empty) return LEGACY_CASE_STUDIES;
+    return snap.docs
       .map((d) => d.data() as CaseStudy & { published?: boolean })
       .filter((c) => c.published !== false)
       .sort((a, b) => {
@@ -158,31 +155,29 @@ export async function getAllCaseStudies(): Promise<CaseStudy[]> {
         if (ac !== bc) return ac - bc;
         return (b.publishedAt ?? "").localeCompare(a.publishedAt ?? "");
       });
-    return cachedAll;
   } catch (err) {
     console.warn("[case-studies] Firestore fetch failed; using legacy.", err);
-    cachedAll = LEGACY_CASE_STUDIES;
-    return cachedAll;
+    return LEGACY_CASE_STUDIES;
   }
-}
+});
 
-export async function getCaseStudy(
-  slug: string
-): Promise<CaseStudy | undefined> {
-  try {
-    const doc = await getAdminDb()
-      .collection(COLLECTIONS.caseStudies)
-      .doc(slug)
-      .get();
-    if (doc.exists) {
-      const data = doc.data() as CaseStudy & { published?: boolean };
-      return data.published === false ? undefined : data;
+export const getCaseStudy = cache(
+  async (slug: string): Promise<CaseStudy | undefined> => {
+    try {
+      const doc = await getAdminDb()
+        .collection(COLLECTIONS.caseStudies)
+        .doc(slug)
+        .get();
+      if (doc.exists) {
+        const data = doc.data() as CaseStudy & { published?: boolean };
+        return data.published === false ? undefined : data;
+      }
+    } catch (err) {
+      console.warn(
+        "[case-studies] getCaseStudy Firestore fetch failed; trying legacy.",
+        err
+      );
     }
-  } catch (err) {
-    console.warn(
-      "[case-studies] getCaseStudy Firestore fetch failed; trying legacy.",
-      err
-    );
+    return LEGACY_CASE_STUDIES.find((c) => c.slug === slug);
   }
-  return LEGACY_CASE_STUDIES.find((c) => c.slug === slug);
-}
+);

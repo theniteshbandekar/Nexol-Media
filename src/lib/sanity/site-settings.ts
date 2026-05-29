@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { getAdminDb } from "@/lib/firebase/admin";
 import { COLLECTIONS, SINGLETON_IDS } from "@/lib/firebase/collections";
 
@@ -75,21 +77,15 @@ export const FALLBACK: SiteSettings = {
   },
 };
 
-let cached: SiteSettings | undefined;
-
-export async function getSiteSettings(): Promise<SiteSettings> {
-  if (cached) return cached;
+export const getSiteSettings = cache(async (): Promise<SiteSettings> => {
   try {
     const doc = await getAdminDb()
       .collection(COLLECTIONS.singletons)
       .doc(SINGLETON_IDS.siteSettings)
       .get();
     const raw = (doc.data() as Partial<SiteSettings> | undefined) ?? null;
-    if (!raw) {
-      cached = FALLBACK;
-      return cached;
-    }
-    cached = {
+    if (!raw) return FALLBACK;
+    return {
       primaryNav: raw.primaryNav?.length ? raw.primaryNav : FALLBACK.primaryNav,
       headerCtaLabel: raw.headerCtaLabel ?? FALLBACK.headerCtaLabel,
       headerCtaHref: raw.headerCtaHref ?? FALLBACK.headerCtaHref,
@@ -110,13 +106,11 @@ export async function getSiteSettings(): Promise<SiteSettings> {
         ...(raw.routeVisibility ?? {}),
       },
     };
-    return cached;
   } catch (err) {
     console.warn("[siteSettings] Firestore fetch failed; using fallback.", err);
-    cached = FALLBACK;
-    return cached;
+    return FALLBACK;
   }
-}
+});
 
 export function isRouteHidden(
   settings: SiteSettings,

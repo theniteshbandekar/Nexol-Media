@@ -199,7 +199,7 @@ async function seedBlogPosts(
       featured: p.featured ?? false,
       published: true,
       author: { _type: "reference", _ref: authorId },
-      heroLabel: p.hero.label,
+      heroLabel: p.hero.kind === "placeholder" ? p.hero.label : undefined,
       body: bodyToPortableText(p.body),
     } as any);
     console.log(`  ✓ Post: ${p.title}`);

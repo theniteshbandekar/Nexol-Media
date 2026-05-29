@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -118,8 +119,20 @@ function BlogBody({ blocks }: { blocks: BlogBlock[] }) {
           case "figure":
             return (
               <figure key={key} className="figure">
-                <div className="frame" aria-hidden="true">
-                  <span className="ph-label">{block.placeholderLabel}</span>
+                <div className="frame">
+                  {block.src ? (
+                    <Image
+                      src={block.src}
+                      alt={block.alt ?? ""}
+                      fill
+                      sizes="(max-width: 760px) 100vw, 760px"
+                      style={{ objectFit: "cover" }}
+                    />
+                  ) : (
+                    <span className="ph-label" aria-hidden="true">
+                      {block.placeholderLabel}
+                    </span>
+                  )}
                 </div>
                 {block.caption && <figcaption>{block.caption}</figcaption>}
               </figure>
@@ -281,8 +294,21 @@ export default async function BlogPostPage({ params }: Props) {
       </header>
 
       <div className="post-hero" aria-hidden="true">
-        <span className="pulse" />
-        <span className="label">{post.hero.label}</span>
+        {post.hero.kind === "image" ? (
+          <Image
+            src={post.hero.src}
+            alt={post.hero.alt}
+            fill
+            sizes="(max-width: 1100px) 100vw, 1100px"
+            priority
+            style={{ objectFit: "cover" }}
+          />
+        ) : (
+          <>
+            <span className="pulse" />
+            <span className="label">{post.hero.label}</span>
+          </>
+        )}
       </div>
 
       <div className="post-grid">
@@ -351,11 +377,21 @@ export default async function BlogPostPage({ params }: Props) {
                 className={`media ${toneClasses[i % toneClasses.length]}`}
                 aria-hidden="true"
               >
+                {p.hero.kind === "image" ? (
+                  <Image
+                    src={p.hero.src}
+                    alt={p.hero.alt}
+                    fill
+                    sizes="(max-width: 640px) 100vw, 360px"
+                    style={{ objectFit: "cover" }}
+                  />
+                ) : (
+                  <span className="label">{p.hero.label}</span>
+                )}
                 <span className="tag">
                   <span className="dot" />
                   {p.category}
                 </span>
-                <span className="label">{p.hero.label}</span>
               </div>
               <div className="body">
                 <h3>{p.title}</h3>

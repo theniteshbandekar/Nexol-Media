@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -161,11 +162,21 @@ export function BlogIndexShell({ posts }: { posts: BlogPost[] }) {
                   className={`media ${toneClasses[i % toneClasses.length]}`}
                   aria-hidden="true"
                 >
+                  {p.hero.kind === "image" ? (
+                    <Image
+                      src={p.hero.src}
+                      alt={p.hero.alt}
+                      fill
+                      sizes="(max-width: 640px) 100vw, 360px"
+                      style={{ objectFit: "cover" }}
+                    />
+                  ) : (
+                    <span className="label">{p.hero.label}</span>
+                  )}
                   <span className="tag">
                     <span className="dot" />
                     {p.category}
                   </span>
-                  <span className="label">{p.hero.label}</span>
                 </div>
                 <div className="body">
                   <h3>{p.title}</h3>

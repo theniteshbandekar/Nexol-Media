@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -100,8 +101,20 @@ export default async function BlogPage() {
             href={`/blog/${featured.slug}`}
           >
             <div className="media" aria-hidden="true">
-              <span className="pulse" />
-              <span className="label">{featured.hero.label}</span>
+              {featured.hero.kind === "image" ? (
+                <Image
+                  src={featured.hero.src}
+                  alt={featured.hero.alt}
+                  fill
+                  sizes="(max-width: 900px) 100vw, 640px"
+                  style={{ objectFit: "cover" }}
+                />
+              ) : (
+                <>
+                  <span className="pulse" />
+                  <span className="label">{featured.hero.label}</span>
+                </>
+              )}
             </div>
             <div className="body">
               <div className="pill-row">

@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { getAdminDb } from "./firebase/admin";
 import { COLLECTIONS } from "./firebase/collections";
 import type { BlogCategory, BlogPostCategory } from "./blog-format";
@@ -18,9 +20,23 @@ export type BlogBlock =
   | { kind: "ol"; items: string[] }
   | { kind: "ul"; items: string[] }
   | { kind: "quote"; text: string; by?: string }
-  | { kind: "figure"; placeholderLabel: string; caption?: string };
+  // A figure is either a real uploaded image ({src,alt}) or a placeholder
+  // frame ({placeholderLabel}). The renderer prefers the image when present.
+  | {
+      kind: "figure";
+      placeholderLabel?: string;
+      src?: string;
+      alt?: string;
+      caption?: string;
+    };
 
 export type BlogAuthor = { name: string; role: string; initials: string };
+
+// Hero media: a real uploaded image or the designed placeholder tile.
+// Same shape as the case-study StoryPhoto so image handling is consistent.
+export type BlogHero =
+  | { kind: "placeholder"; label: string }
+  | { kind: "image"; src: string; alt: string };
 
 export type BlogPost = {
   slug: string;
@@ -33,7 +49,7 @@ export type BlogPost = {
   readTimeMinutes: number;
   author: BlogAuthor;
   tags: string[];
-  hero: { kind: "placeholder"; label: string };
+  hero: BlogHero;
   body: BlogBlock[];
   featured?: boolean;
 };
@@ -302,42 +318,43 @@ export const __LEGACY_BLOG_POSTS = LEGACY_POSTS;
  * Module-level cache. Subsequent fetches in the same server request reuse
  * the result. Cleared between requests by the Node process boundary.
  */
-let cachedAll: BlogPost[] | undefined;
-
-export async function getAllBlogPosts(): Promise<BlogPost[]> {
-  if (cachedAll) return cachedAll;
+// React cache() memoizes within a single render pass only (per-request dedup),
+// NOT across requests — so on-demand revalidation always re-reads Firestore.
+// (A module-level `let` cache would persist on the long-lived SSR process and
+// serve stale content after an admin edit.)
+export const getAllBlogPosts = cache(async (): Promise<BlogPost[]> => {
   try {
     const snap = await getAdminDb().collection(COLLECTIONS.blogPosts).get();
     // Empty collection → fall back to the legacy seed (migration safety).
     // Non-empty → honor the published flag (may legitimately be empty).
-    cachedAll = snap.empty
+    return snap.empty
       ? LEGACY_POSTS
       : snap.docs
           .map((d) => d.data() as BlogPost & { published?: boolean })
           .filter((p) => p.published !== false);
-    return cachedAll;
   } catch (err) {
     console.warn("[blog] Firestore fetch failed; using legacy seed.", err);
-    cachedAll = LEGACY_POSTS;
-    return cachedAll;
+    return LEGACY_POSTS;
   }
-}
+});
 
-export async function getPost(slug: string): Promise<BlogPost | undefined> {
-  try {
-    const doc = await getAdminDb()
-      .collection(COLLECTIONS.blogPosts)
-      .doc(slug)
-      .get();
-    if (doc.exists) {
-      const data = doc.data() as BlogPost & { published?: boolean };
-      return data.published === false ? undefined : data;
+export const getPost = cache(
+  async (slug: string): Promise<BlogPost | undefined> => {
+    try {
+      const doc = await getAdminDb()
+        .collection(COLLECTIONS.blogPosts)
+        .doc(slug)
+        .get();
+      if (doc.exists) {
+        const data = doc.data() as BlogPost & { published?: boolean };
+        return data.published === false ? undefined : data;
+      }
+    } catch (err) {
+      console.warn("[blog] getPost Firestore fetch failed; trying legacy.", err);
     }
-  } catch (err) {
-    console.warn("[blog] getPost Firestore fetch failed; trying legacy.", err);
+    return LEGACY_POSTS.find((p) => p.slug === slug);
   }
-  return LEGACY_POSTS.find((p) => p.slug === slug);
-}
+);
 
 export async function getFeaturedPost(): Promise<BlogPost | undefined> {
   const all = await getAllBlogPosts();

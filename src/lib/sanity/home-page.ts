@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import type { AccentHeading } from "@/lib/case-studies";
 
 import { getAdminDb } from "@/lib/firebase/admin";
@@ -122,21 +124,15 @@ export const FALLBACK: HomePage = {
   },
 };
 
-let cached: HomePage | undefined;
-
-export async function getHomePage(): Promise<HomePage> {
-  if (cached) return cached;
+export const getHomePage = cache(async (): Promise<HomePage> => {
   try {
     const doc = await getAdminDb()
       .collection(COLLECTIONS.singletons)
       .doc(SINGLETON_IDS.homePage)
       .get();
     const raw = (doc.data() as Partial<HomePage> | undefined) ?? null;
-    if (!raw) {
-      cached = FALLBACK;
-      return cached;
-    }
-    cached = {
+    if (!raw) return FALLBACK;
+    return {
       hero: { ...FALLBACK.hero, ...(raw.hero ?? {}) },
       vsl: { ...FALLBACK.vsl, ...(raw.vsl ?? {}) },
       stats: raw.stats?.length ? raw.stats : FALLBACK.stats,
@@ -150,10 +146,8 @@ export async function getHomePage(): Promise<HomePage> {
           : FALLBACK.hook.secondaryLinks,
       },
     };
-    return cached;
   } catch (err) {
     console.warn("[homePage] Firestore fetch failed; using fallback.", err);
-    cached = FALLBACK;
-    return cached;
+    return FALLBACK;
   }
-}
+});

@@ -10,6 +10,7 @@ export default function AdminLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -18,10 +19,15 @@ export default function AdminLoginPage() {
     setBusy(true);
     setError(null);
     try {
+      // TEMP DEBUG: reveal exactly what the browser submits (no plaintext pw).
+      console.log(
+        "[login-debug]",
+        JSON.stringify({ email: email.trim(), pwLen: password.trim().length }),
+      );
       const cred = await signInWithEmailAndPassword(
         getClientAuth(),
         email.trim(),
-        password,
+        password.trim(),
       );
       const idToken = await cred.user.getIdToken();
       const res = await fetch("/admin/api/session", {
@@ -34,11 +40,22 @@ export default function AdminLoginPage() {
       router.refresh();
     } catch (err) {
       const code = (err as { code?: string })?.code ?? "";
-      setError(
-        code.startsWith("auth/")
-          ? "Invalid email or password."
-          : "Sign-in failed. Please try again.",
-      );
+      const credentialErrors = [
+        "auth/invalid-credential",
+        "auth/wrong-password",
+        "auth/user-not-found",
+        "auth/invalid-email",
+      ];
+      if (credentialErrors.includes(code)) {
+        setError("Invalid email or password.");
+      } else if (code) {
+        // Surface the real Firebase code (config / throttle / network), so a
+        // misconfigured key isn't silently reported as a bad password.
+        setError(`Sign-in failed: ${code}`);
+      } else {
+        setError("Sign-in failed. Please try again.");
+      }
+      console.error("admin sign-in failed", err);
       setBusy(false);
     }
   }
@@ -54,7 +71,7 @@ export default function AdminLoginPage() {
           <input
             id="email"
             type="email"
-            autoComplete="username"
+            autoComplete="off"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -62,14 +79,24 @@ export default function AdminLoginPage() {
         </div>
         <div className="admin-field">
           <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          <div className="admin-pw">
+            <input
+              id="password"
+              type={showPw ? "text" : "password"}
+              autoComplete="off"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <button
+              type="button"
+              className="admin-pw-toggle"
+              onClick={() => setShowPw((s) => !s)}
+              aria-label={showPw ? "Hide password" : "Show password"}
+            >
+              {showPw ? "Hide" : "Show"}
+            </button>
+          </div>
         </div>
         <button className="admin-btn" type="submit" disabled={busy}>
           {busy ? "Signing in…" : "Sign in"}

@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 
 import { getCurrentUser, type UserRole } from "@/lib/firebase/auth";
 import { LogoutButton } from "@/components/admin/logout-button";
+import { AdminNav } from "@/components/admin/admin-nav";
 
 type NavItem = {
   href: string;
@@ -36,24 +36,7 @@ export default async function ProtectedAdminLayout({
     <div className="admin-shell">
       <aside className="admin-sidebar">
         <div className="admin-brand">Nexol Admin</div>
-        <nav>
-          {items.map((n) =>
-            n.ready ? (
-              <Link key={n.href} href={n.href} className="admin-navlink">
-                {n.label}
-              </Link>
-            ) : (
-              <span
-                key={n.href}
-                className="admin-navlink disabled"
-                aria-disabled="true"
-              >
-                {n.label}
-                <em>soon</em>
-              </span>
-            ),
-          )}
-        </nav>
+        <AdminNav items={items} />
         <div className="admin-user">
           <span className="email">{user.email}</span>
           <span className="admin-role">{user.role}</span>

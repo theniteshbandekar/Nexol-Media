@@ -25,7 +25,10 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   const session = (await cookies()).get(SESSION_COOKIE)?.value;
   if (!session) return null;
   try {
-    const decoded = await getAdminAuth().verifySessionCookie(session, true);
+    // Verify locally (no checkRevoked) to avoid a network round-trip to the
+    // Firebase Auth backend on every admin request. Logout deletes the cookie,
+    // so revocation-on-every-read isn't needed for normal sign-out.
+    const decoded = await getAdminAuth().verifySessionCookie(session);
     return {
       uid: decoded.uid,
       email: decoded.email ?? null,

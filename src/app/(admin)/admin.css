@@ -1,13 +1,23 @@
 .admin-body {
   margin: 0;
   font-family: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  /* Flat, solid surface — no dot texture, no gradient. */
   background: var(--bg);
   color: var(--fg);
   -webkit-font-smoothing: antialiased;
 }
+/* Remove the site-wide vignette overlay (globals.css body::before) inside admin. */
+.admin-body::before {
+  content: none;
+}
 
 /* ── Login ───────────────────────────────────────────────────────────── */
 .admin-login {
+  /* Match the bolder canvas: stronger borders + darker muted text. */
+  --border: var(--gray-300);
+  --border-strong: var(--gray-400);
+  --fg-muted: var(--gray-600);
+  --fg-soft: var(--gray-500);
   min-height: 100dvh;
   display: grid;
   place-items: center;
@@ -17,12 +27,14 @@
   width: 100%;
   max-width: 380px;
   background: var(--bg-elev);
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: var(--r-2xl);
   padding: 32px;
 }
 .admin-login-card h1 {
   font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   margin: 0 0 4px;
 }
 .admin-login-card .sub {
@@ -52,6 +64,32 @@
 .admin-field input:focus {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
+}
+.admin-pw {
+  position: relative;
+  display: flex;
+}
+.admin-pw input {
+  flex: 1;
+  padding-right: 64px;
+}
+.admin-pw-toggle {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 30px;
+  padding: 0 10px;
+  border: none;
+  background: transparent;
+  color: var(--fg-muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--r-md);
+}
+.admin-pw-toggle:hover {
+  color: var(--fg);
 }
 .admin-btn {
   width: 100%;
@@ -83,35 +121,55 @@
   grid-template-columns: 240px 1fr;
   min-height: 100dvh;
 }
+/* ── Dark sidebar ── */
 .admin-sidebar {
   display: flex;
   flex-direction: column;
   gap: 4px;
   padding: 24px 16px;
-  border-right: 1px solid var(--border);
-  background: var(--bg-elev);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--gray-950);
 }
 .admin-brand {
   font-weight: 700;
   font-size: 16px;
   margin-bottom: 20px;
   padding: 0 8px;
+  color: #fff;
 }
 .admin-navlink {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 9px 12px;
   border-radius: var(--r-md);
-  color: var(--fg);
+  color: var(--gray-100);
   text-decoration: none;
   font-size: 14px;
+  font-weight: 600;
 }
 .admin-navlink:hover {
-  background: var(--bg);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+.admin-navlink.active {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--accent);
+  font-weight: 600;
+}
+.admin-navlink.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 7px;
+  bottom: 7px;
+  width: 3px;
+  border-radius: var(--r-pill);
+  background: var(--accent);
 }
 .admin-navlink.disabled {
-  color: var(--fg-muted);
+  color: var(--gray-600);
   cursor: default;
 }
 .admin-navlink.disabled em {
@@ -119,8 +177,8 @@
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--fg-muted);
-  border: 1px solid var(--border);
+  color: var(--gray-500);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: var(--r-pill);
   padding: 1px 7px;
 }
@@ -130,11 +188,11 @@
   flex-direction: column;
   gap: 6px;
   padding: 12px 8px 0;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   font-size: 13px;
 }
 .admin-user .email {
-  color: var(--fg);
+  color: #fff;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -142,6 +200,7 @@
   align-self: flex-start;
   text-transform: uppercase;
   font-size: 10px;
+  font-weight: 700;
   letter-spacing: 0.06em;
   color: var(--accent-fg);
   background: var(--accent);
@@ -151,21 +210,30 @@
 .admin-logout {
   margin-top: 8px;
   height: 34px;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: var(--r-md);
   background: transparent;
-  color: var(--fg);
+  color: var(--gray-200);
   font-size: 13px;
   cursor: pointer;
 }
 .admin-logout:hover {
-  border-color: var(--border-strong);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #fff;
 }
+/* ── Bold light canvas ── */
 .admin-main {
+  /* Stronger borders + darker muted text for a crisp, high-contrast canvas. */
+  --border: var(--gray-300);
+  --border-strong: var(--gray-400);
+  --fg-muted: var(--gray-600);
+  --fg-soft: var(--gray-500);
   padding: 40px;
 }
 .admin-page h1 {
   font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   margin: 0 0 12px;
 }
 .admin-muted {
@@ -179,20 +247,23 @@
 }
 .adm-editor > h1 {
   font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   margin: 0 0 24px;
 }
 .adm-section {
   background: var(--bg-elev);
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: var(--r-lg);
   padding: 20px 22px;
   margin-bottom: 20px;
 }
 .adm-section > h2 {
-  font-size: 15px;
+  font-size: 14px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--fg-muted);
+  letter-spacing: 0.04em;
+  color: var(--fg);
   margin: 0 0 16px;
 }
 .adm-section-note {
@@ -210,7 +281,7 @@
 .adm-field label,
 .adm-label {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--fg);
 }
 .adm-hint {
@@ -222,9 +293,9 @@
   width: 100%;
   height: 40px;
   padding: 0 12px;
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: var(--r-md);
-  background: var(--bg);
+  background: var(--bg-elev);
   color: var(--fg);
   font-size: 14px;
   font-family: inherit;
@@ -376,7 +447,7 @@
   gap: 16px;
   padding: 12px 40px;
   background: var(--bg-elev);
-  border-top: 1px solid var(--border);
+  border-top: 1.5px solid var(--border);
   z-index: 10;
 }
 .adm-savebar-status {
@@ -403,7 +474,7 @@
   border-radius: var(--r-md);
   background: var(--accent);
   color: var(--accent-fg);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 14px;
   cursor: pointer;
 }
@@ -444,6 +515,8 @@
 }
 .adm-list-head h1 {
   font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   margin: 0;
 }
 .adm-list {
@@ -456,7 +529,7 @@
   flex-direction: column;
   gap: 3px;
   padding: 14px 16px;
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: var(--r-md);
   background: var(--bg-elev);
   text-decoration: none;

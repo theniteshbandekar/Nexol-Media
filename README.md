@@ -1,6 +1,16 @@
 # Nexol Media
 
-A media studio site for Tech, AI and Design creators. Next.js 16 App Router, Sanity-backed CMS at `/studio`, Lenis smooth scroll, Framer Motion animations, structured data, OG image generation, GA4 + Microsoft Clarity (gated by cookie consent), Resend-backed contact + newsletter forms.
+> ⚠️ **This README is partially outdated.** The site no longer uses **Sanity** or
+> **Vercel**: content is now stored in **Firestore** and edited through an in-house
+> dashboard at **`/admin`**, and the site deploys on **Firebase App Hosting**. The
+> sections below that describe Sanity Studio (`/studio`), Sanity env vars/tokens, and
+> Vercel deployment are historical. For the current setup and deployment, see
+> **`GO-LIVE.md`** and **`plan.md`** (the sources of truth).
+
+A media studio site for Tech, AI and Design creators. Next.js 16 App Router, an
+in-house Firestore-backed CMS at `/admin`, Lenis smooth scroll, Framer Motion
+animations, structured data, OG image generation, GA4 + Microsoft Clarity (gated by
+cookie consent), Resend-backed contact + newsletter forms.
 
 ## Tech stack
 

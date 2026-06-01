@@ -284,8 +284,17 @@ export function ContactBookingCard({
             const isSelected = cell.state === "open" && cell.iso === selectedDate;
             const cls = isSelected ? "selected" : cell.state;
             if (cell.state !== "open") {
+              // Unavailable day: expose it to assistive tech as "unavailable"
+              // (consistent with the "available" label on open days) instead of
+              // hiding it, so the calendar reads coherently. role="img" gives the
+              // non-interactive cell an accessible name.
               return (
-                <span key={cell.iso} className={`day ${cls}`} aria-hidden="true">
+                <span
+                  key={cell.iso}
+                  className={`day ${cls}`}
+                  role="img"
+                  aria-label={`${cell.iso}, unavailable`}
+                >
                   {cell.dayNum}
                 </span>
               );

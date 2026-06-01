@@ -1,4 +1,5 @@
 import { adminListBookings } from "@/lib/firebase/admin-content";
+import { requireAdminPage } from "@/lib/firebase/auth";
 
 function fmt(iso?: string): string {
   if (!iso) return "—";
@@ -7,6 +8,7 @@ function fmt(iso?: string): string {
 }
 
 export default async function AdminBookingsPage() {
+  await requireAdminPage();
   const bookings = await adminListBookings();
   return (
     <div className="adm-editor">

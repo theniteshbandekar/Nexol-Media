@@ -32,6 +32,13 @@ env:
     value: "1:681869341585:web:d719ba7025ae4da74b2030"
     availability: [BUILD, RUNTIME]
 
+  # --- Canonical site URL (drives metadataBase, sitemap, robots, JSON-LD). ---
+  # Set to the App Hosting preview URL on a staging backend so previews don't emit
+  # production canonicals; keep the production domain here for the live backend.
+  - variable: NEXT_PUBLIC_SITE_URL
+    value: https://nexolmedia.com
+    availability: [BUILD, RUNTIME]
+
   # --- Analytics / Search Console (public) ---
   - variable: NEXT_PUBLIC_GA_ID
     value: G-MB3JDZG98F

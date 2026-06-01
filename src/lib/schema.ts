@@ -2,7 +2,12 @@ import type { BlogPost } from "@/lib/blog";
 import type { CaseStudy } from "@/lib/case-studies";
 import type { Service } from "@/lib/services";
 
-export const SITE_URL = "https://nexolmedia.com";
+// Env-driven so App Hosting preview/staging deployments emit their own URL in
+// canonicals/sitemap/robots/JSON-LD instead of the production domain. Falls back
+// to the production domain when NEXT_PUBLIC_SITE_URL is unset (e.g. local dev).
+export const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://nexolmedia.com"
+).replace(/\/$/, "");
 export const SITE_NAME = "Nexol Media";
 export const SITE_TWITTER = "@nexolmedia";
 

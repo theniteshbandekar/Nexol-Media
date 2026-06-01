@@ -1,8 +1,10 @@
 import Link from "next/link";
 
 import { adminListServices } from "@/lib/firebase/admin-content";
+import { requireAdminPage } from "@/lib/firebase/auth";
 
 export default async function AdminServicesListPage() {
+  await requireAdminPage();
   const services = await adminListServices();
   return (
     <div className="adm-editor">

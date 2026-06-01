@@ -19,11 +19,6 @@ export default function AdminLoginPage() {
     setBusy(true);
     setError(null);
     try {
-      // TEMP DEBUG: reveal exactly what the browser submits (no plaintext pw).
-      console.log(
-        "[login-debug]",
-        JSON.stringify({ email: email.trim(), pwLen: password.trim().length }),
-      );
       const cred = await signInWithEmailAndPassword(
         getClientAuth(),
         email.trim(),

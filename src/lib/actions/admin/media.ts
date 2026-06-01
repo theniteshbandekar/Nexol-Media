@@ -9,10 +9,26 @@ export type UploadResult =
 
 export type DeleteResult = { ok: true } | { ok: false; error: string };
 
+// Confine all storage paths to the `images/` root with no traversal. `path` is
+// client-supplied (FormData / delete arg), so this is the server-side trust
+// boundary: every segment must be a safe token and `..`/empty segments are
+// rejected. Covers both upload destinations (a directory prefix) and deletes
+// (a full object path including the filename + extension).
+function isSafeStoragePath(path: string): boolean {
+  if (!path.startsWith("images/")) return false;
+  return path
+    .split("/")
+    .every(
+      (seg) =>
+        seg.length > 0 && seg !== "." && seg !== ".." && /^[A-Za-z0-9._-]+$/.test(seg),
+    );
+}
+
 export async function deleteImageAction(path: string): Promise<DeleteResult> {
   try {
     await requireWriter();
     if (!path) return { ok: false, error: "Missing path." };
+    if (!isSafeStoragePath(path)) return { ok: false, error: "Invalid path." };
     await deleteImage(path);
     return { ok: true };
   } catch (err) {
@@ -43,6 +59,7 @@ export async function uploadImageAction(formData: FormData): Promise<UploadResul
       return { ok: false, error: "Image must be under 10 MB." };
     }
     if (!path) return { ok: false, error: "Missing upload path." };
+    if (!isSafeStoragePath(path)) return { ok: false, error: "Invalid upload path." };
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");

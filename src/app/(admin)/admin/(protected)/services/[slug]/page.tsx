@@ -5,12 +5,14 @@ import {
   adminListCaseStudies,
 } from "@/lib/firebase/admin-content";
 import { ServiceEditor } from "@/components/admin/editors/service-editor";
+import { requireAdminPage } from "@/lib/firebase/auth";
 
 export default async function AdminServiceEditPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  await requireAdminPage();
   const { slug } = await params;
   const [service, caseStudies] = await Promise.all([
     adminGetService(slug),

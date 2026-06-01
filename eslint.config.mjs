@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // macOS AppleDouble metadata files created on the external (exFAT) drive.
+    // They're binary, so ESLint chokes parsing them as TS. (.gitignore is not
+    // consulted by ESLint's flat config, so ignore them explicitly here.)
+    "**/._*",
   ]),
 ]);
 

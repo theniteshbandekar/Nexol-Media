@@ -4,6 +4,7 @@ import {
   type AdminService,
 } from "@/lib/firebase/admin-content";
 import { ServiceEditor } from "@/components/admin/editors/service-editor";
+import { requireAdminPage } from "@/lib/firebase/auth";
 
 function blankService(): AdminService {
   const d = (): ServiceDeliverable => ({ title: "", description: "", bullets: [] });
@@ -31,6 +32,7 @@ function blankService(): AdminService {
 }
 
 export default async function AdminServiceNewPage() {
+  await requireAdminPage();
   const caseStudies = await adminListCaseStudies();
   const opts = caseStudies.map((c) => ({ value: c.slug, label: c.name }));
   return <ServiceEditor initial={blankService()} mode="create" caseStudyOptions={opts} />;

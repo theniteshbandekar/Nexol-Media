@@ -2,6 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 import { getAdminAuth } from "./admin";
 import { SESSION_COOKIE } from "./session";
@@ -52,5 +53,20 @@ export async function requireWriter(): Promise<CurrentUser> {
   if (!user || (user.role !== "admin" && user.role !== "writer")) {
     throw new Error("Unauthorized: writer role required.");
   }
+  return user;
+}
+
+/**
+ * Page-level guard for ADMIN-ONLY server components. The protected layout only
+ * confirms a session exists (any role); NAV filtering merely hides links. Without
+ * this, a `writer` could navigate directly to an admin-only page and READ its data
+ * (e.g. the user roster). Call at the top of every admin-only page: it redirects
+ * unauthenticated users to login and non-admin (writer) users to the dashboard,
+ * instead of throwing. Returns the admin user for convenience.
+ */
+export async function requireAdminPage(): Promise<CurrentUser> {
+  const user = await getCurrentUser();
+  if (!user || !user.role) redirect("/admin/login");
+  if (user.role !== "admin") redirect("/admin");
   return user;
 }

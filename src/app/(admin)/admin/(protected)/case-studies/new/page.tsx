@@ -1,5 +1,6 @@
 import { CaseStudyEditor } from "@/components/admin/editors/case-study-editor";
 import type { AdminCaseStudy } from "@/lib/firebase/admin-content";
+import { requireAdminPage } from "@/lib/firebase/auth";
 
 function blankCaseStudy(): AdminCaseStudy {
   return {
@@ -18,6 +19,7 @@ function blankCaseStudy(): AdminCaseStudy {
   };
 }
 
-export default function AdminCaseStudyNewPage() {
+export default async function AdminCaseStudyNewPage() {
+  await requireAdminPage();
   return <CaseStudyEditor initial={blankCaseStudy()} mode="create" />;
 }

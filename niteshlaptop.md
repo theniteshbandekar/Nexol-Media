@@ -1,5 +1,10 @@
 # Nexol Media — Setup & Launch Guide (Nitesh's Mac)
 
+> ⚠️ **Outdated.** This guide predates the migration off Sanity + Vercel. The site
+> now uses **Firestore** + an in-house **`/admin`** dashboard and deploys on
+> **Firebase App Hosting**. Follow **`GO-LIVE.md`** (and `plan.md`) instead — the
+> Sanity/Vercel steps below are historical.
+
 This is the Nexol Media website (Next.js 16 + Sanity CMS). The code is **done**;
 what remains is connecting live services — all of which need your accounts.
 This guide takes the site from "running on placeholder data on a laptop" to

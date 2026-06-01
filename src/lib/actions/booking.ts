@@ -10,6 +10,7 @@ import {
   toBookingDateISO,
 } from "@/lib/booking-constants";
 import { sendTransactionalEmail } from "@/lib/email";
+import { clientIp, rateLimit } from "@/lib/rate-limit";
 import {
   buildDaySlots,
   getBusyRanges,
@@ -44,7 +45,8 @@ export type BookingResult =
     };
 
 function isEmail(v: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+  // Require a 2+ char TLD; stays permissive enough not to reject valid addresses.
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
 }
 
 function isWithinWindow(dateISO: string): boolean {
@@ -164,6 +166,17 @@ export async function createBooking(
     return { ok: false, reason: "validation", error: "Slot length mismatch." };
   }
 
+  // Throttle before the expensive Google Calendar calls so a script can't spam
+  // bogus calendar invites / confirmation emails.
+  const ip = await clientIp();
+  if (!rateLimit(`booking:${ip}`, 5, 60 * 60 * 1000).ok) {
+    return {
+      ok: false,
+      reason: "validation",
+      error: "Too many booking attempts from here. Please try again later.",
+    };
+  }
+
   if (!hasGoogleCalendarCredentials()) {
     return {
       ok: false,
@@ -233,14 +246,24 @@ export async function createBooking(
   }
 
   // Branded confirmation via Resend. Google also sends its own invite — this
-  // adds a Nexol-branded touch and surfaces the Meet link prominently.
-  await sendTransactionalEmail({
+  // adds a Nexol-branded touch and surfaces the Meet link prominently. The send
+  // is best-effort (the booking is already confirmed via the calendar event), but
+  // a failure must NOT be swallowed: log it loudly so a misconfigured/down Resend
+  // is detectable in server logs instead of users silently missing confirmations.
+  const emailResult = await sendTransactionalEmail({
     to: payload.email,
     subject: "Your Nexol Media call is booked",
     replyToOverride: process.env.RESEND_REPLY_TO ?? "info@nexolmedia.com",
     text: buildPlainText(payload, inserted.meetLink),
     html: buildHtml(payload, inserted.meetLink),
   });
+  if (!emailResult.ok) {
+    console.error(
+      `[booking] confirmation email NOT sent to ${payload.email} (${emailResult.reason})` +
+        (emailResult.error ? `: ${emailResult.error}` : "") +
+        ` — eventId=${inserted.eventId}`,
+    );
+  }
 
   return { ok: true, meetLink: inserted.meetLink };
 }

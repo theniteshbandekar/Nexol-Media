@@ -1,3 +1,6 @@
+// LEGACY NAMING: this "sanity" directory is now fully FIRESTORE-backed via the
+// Admin SDK (Sanity was the original CMS; there is no @sanity dependency). The
+// directory name is kept to avoid churn across ~20 import paths.
 import { cache } from "react";
 
 import type { AccentHeading } from "@/lib/case-studies";

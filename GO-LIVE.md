@@ -25,7 +25,7 @@ The Services page and Case-studies page copy are now editable but fall back to t
 
 ### C. App Hosting backend
 - Create an **App Hosting backend** linked to GitHub repo **`theniteshbandekar/Nexol-Media`**, branch **`main`** (this is an interactive GitHub OAuth step in the Firebase console). After linking, every push to `main` auto-deploys.
-- Flesh out **`apphosting.yaml`** (currently a scaffold): `runConfig` (memory ≥ 1Gi; `minInstances: 1` if you want no SSR cold starts), plus `env` — the `NEXT_PUBLIC_FIREBASE_*`, `NEXT_PUBLIC_GA_ID`, `NEXT_PUBLIC_GSC_VERIFICATION`, `BOOKING_OPERATOR_EMAIL`, `GOOGLE_CALENDAR_ID`, `RESEND_FROM_ADDRESS/REPLY_TO/TO_ADDRESS` vars (mark `NEXT_PUBLIC_*` `availability: [BUILD, RUNTIME]`).
+- **`apphosting.yaml` is already fully configured** (runConfig + all `NEXT_PUBLIC_*`, operational, and Secret Manager refs). No edits needed unless you want to change `minInstances` (currently `0` for scale-to-zero; set to `1` to remove SSR cold starts). When Resend is set up (Step H), add `RESEND_API_KEY` + `RESEND_AUDIENCE_ID` as secrets and redeploy. For a **staging/preview** backend, set `NEXT_PUBLIC_SITE_URL` to that backend's URL so previews don't emit production canonicals.
 
 ### D. Secret Manager
 Create secrets and reference them from `apphosting.yaml` (RUNTIME): `FIREBASE_SERVICE_ACCOUNT_KEY`, `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REFRESH_TOKEN`, `RESEND_API_KEY`, `RESEND_AUDIENCE_ID`. Grant the App Hosting service account **Secret Manager Secret Accessor** on each.

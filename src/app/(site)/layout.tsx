@@ -8,7 +8,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { JsonLd } from "@/components/json-ld";
 import { Analytics } from "@/components/analytics";
 import { CookieConsent } from "@/components/cookie-consent";
-import { organizationSchema, websiteSchema, SITE_TWITTER } from "@/lib/schema";
+import { organizationSchema, websiteSchema, SITE_TWITTER, SITE_URL } from "@/lib/schema";
 import { getSiteSettings } from "@/lib/sanity/site-settings";
 import { filterByRouteVisibility } from "@/lib/nav";
 
@@ -27,7 +27,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://nexolmedia.com"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Nexol Media — Polished Videos. Real Growth.",
     template: "%s · Nexol Media",
@@ -65,7 +65,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    url: "https://nexolmedia.com",
+    url: SITE_URL,
     siteName: "Nexol Media",
     title: "Nexol Media — Polished Videos. Real Growth.",
     description:

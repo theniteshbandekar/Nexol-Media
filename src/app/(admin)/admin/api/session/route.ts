@@ -10,6 +10,19 @@ import {
 
 export const runtime = "nodejs";
 
+// CSRF guard: reject a request only when its Origin header is present AND its host
+// doesn't match the request host. Absent Origin is allowed (non-browser clients /
+// proxy quirks) so this can't break legitimate same-origin calls.
+function isCrossOrigin(request: Request): boolean {
+  const origin = request.headers.get("origin");
+  if (!origin) return false;
+  try {
+    return new URL(origin).host !== request.headers.get("host");
+  } catch {
+    return true;
+  }
+}
+
 // POST { idToken } → verify the ID token and mint an httpOnly session cookie.
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as { idToken?: string } | null;
@@ -38,7 +51,10 @@ export async function POST(request: Request) {
 }
 
 // DELETE → clear the cookie and revoke refresh tokens (best effort).
-export async function DELETE() {
+export async function DELETE(request: Request) {
+  if (isCrossOrigin(request)) {
+    return NextResponse.json({ error: "Cross-origin request rejected" }, { status: 403 });
+  }
   const store = await cookies();
   const existing = store.get(SESSION_COOKIE)?.value;
   store.delete(SESSION_COOKIE);

@@ -24,6 +24,12 @@
 .DS_Store
 *.pem
 
+# macOS metadata (AppleDouble files created on non-native filesystems)
+._*
+.AppleDouble
+.Spotlight-V100
+.Trashes
+
 # debug
 npm-debug.log*
 yarn-debug.log*
@@ -41,6 +47,7 @@ yarn-error.log*
 firebase-debug.log*
 firestore-debug.log*
 *-service-account*.json
+*-adminsdk-*.json
 
 # typescript
 *.tsbuildinfo

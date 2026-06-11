@@ -7,10 +7,7 @@ export function HeroSection({ hero }: { hero: HomeHero }) {
       <h1 className="fade-up d2">
         {h1.before}
         {h1.accent && (
-          <>
-            <br />
-            <span className="accent">{h1.accent}</span>
-          </>
+          <span className="accent">{h1.accent}</span>
         )}
         {h1.after}
       </h1>

@@ -533,7 +533,6 @@
   letter-spacing: var(--ls-display);
   color: var(--fg);
   text-wrap: balance;
-  max-width: 14ch;
 }
 .hero h1 .accent {
   position: relative;

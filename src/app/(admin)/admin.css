@@ -137,6 +137,30 @@
   padding: 0 8px;
   color: #fff;
 }
+.admin-nav-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.admin-nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.admin-nav-group-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--gray-500);
+  padding: 0 12px;
+  margin-bottom: 4px;
+}
+.admin-nav-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
 .admin-navlink {
   position: relative;
   display: flex;

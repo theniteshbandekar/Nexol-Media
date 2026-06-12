@@ -12,6 +12,8 @@ import { organizationSchema, websiteSchema, SITE_TWITTER, SITE_URL } from "@/lib
 import { getSiteSettings } from "@/lib/sanity/site-settings";
 import { filterByRouteVisibility } from "@/lib/nav";
 
+export const dynamic = 'force-dynamic';
+
 const manrope = Manrope({
   variable: "--font-manrope",
   subsets: ["latin"],

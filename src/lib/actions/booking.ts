@@ -100,7 +100,7 @@ export async function getAvailableSlots(
   try {
     busy = await getBusyRanges(dateISO);
   } catch (err) {
-    console.error("[booking] freebusy query failed:", err);
+    console.warn("[booking] freebusy query failed (likely invalid credentials):", (err as Error).message);
     return { ok: false, error: "Calendar is temporarily unreachable." };
   }
 
@@ -265,6 +265,23 @@ export async function createBooking(
     );
   }
 
+  const operatorEmail = process.env.BOOKING_OPERATOR_EMAIL;
+  if (operatorEmail) {
+    const notifyResult = await sendTransactionalEmail({
+      to: operatorEmail,
+      subject: `New booking: ${payload.name} — ${formatHuman(payload.startISO)}`,
+      text: buildOperatorPlainText(payload, inserted.meetLink),
+      html: buildOperatorHtml(payload, inserted.meetLink),
+    });
+    if (!notifyResult.ok) {
+      console.error(
+        `[booking] operator notification NOT sent (${notifyResult.reason})` +
+          (notifyResult.error ? `: ${notifyResult.error}` : "") +
+          ` — eventId=${inserted.eventId}`,
+      );
+    }
+  }
+
   return { ok: true, meetLink: inserted.meetLink };
 }
 
@@ -314,6 +331,37 @@ function buildHtml(p: BookingPayload, meetLink: string | null): string {
           : ""
       }
       <p style="margin:24px 0 0;font-size:13px;color:#71717A;">Reply to this email if anything needs to change.</p>
+    </div>
+  </body></html>`;
+}
+
+function buildOperatorPlainText(p: BookingPayload, meetLink: string | null): string {
+  return [
+    `New booking from ${p.name} <${p.email}>`,
+    ``,
+    `When:     ${formatHuman(p.startISO)}`,
+    `Meet:     ${meetLink ?? "See calendar invite."}`,
+    p.services?.length ? `Services: ${p.services.join(", ")}` : "",
+    p.message ? `Message:\n${p.message}` : "",
+  ].filter(Boolean).join("\n");
+}
+
+function buildOperatorHtml(p: BookingPayload, meetLink: string | null): string {
+  const safeName = escapeHtml(p.name);
+  const safeEmail = escapeHtml(p.email);
+  const safeMessage = p.message ? escapeHtml(p.message) : "";
+  const safeServices = p.services?.length ? escapeHtml(p.services.join(", ")) : "";
+  return `<!doctype html><html><body style="margin:0;padding:24px;background:#FAFAFA;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
+    <div style="max-width:560px;margin:0 auto;background:#FFFFFF;border:1px solid #E8E8EA;border-radius:16px;padding:28px;">
+      <div style="font-family:monospace;font-size:11px;color:#71717A;text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;">New booking · Nexol Media</div>
+      <h1 style="margin:0 0 18px;font-size:22px;font-weight:600;color:#0A0A0B;">Someone booked a call.</h1>
+      <p style="margin:0 0 4px;font-size:14px;color:#71717A;font-family:monospace;text-transform:uppercase;letter-spacing:.06em;">Who</p>
+      <p style="margin:0 0 16px;font-size:16px;color:#0A0A0B;">${safeName} &lt;<a href="mailto:${safeEmail}" style="color:#0A0A0B;">${safeEmail}</a>&gt;</p>
+      <p style="margin:0 0 4px;font-size:14px;color:#71717A;font-family:monospace;text-transform:uppercase;letter-spacing:.06em;">When</p>
+      <p style="margin:0 0 16px;font-size:16px;color:#0A0A0B;">${escapeHtml(formatHuman(p.startISO))}</p>
+      ${meetLink ? `<a href="${escapeHtml(meetLink)}" style="display:inline-block;background:#0A0A0B;color:#FFFFFF;font-size:14px;font-weight:500;padding:12px 18px;border-radius:999px;text-decoration:none;">Join Google Meet</a>` : ""}
+      ${safeServices ? `<p style="margin:16px 0 0;font-size:14px;color:#27272A;"><strong>Interested in:</strong> ${safeServices}</p>` : ""}
+      ${safeMessage ? `<div style="border-top:1px solid #E8E8EA;margin-top:20px;padding-top:16px;font-size:15px;line-height:1.55;color:#27272A;white-space:pre-wrap;">${safeMessage}</div>` : ""}
     </div>
   </body></html>`;
 }

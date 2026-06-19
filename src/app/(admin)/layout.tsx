@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 
+import { PushSetup } from "@/components/admin/push-setup";
 import "../globals.css";
 import "./admin.css";
 
@@ -14,6 +15,7 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   title: "Admin · Nexol Media",
   robots: { index: false, follow: false },
+  manifest: "/admin-manifest.json",
 };
 
 export default function AdminRootLayout({
@@ -21,7 +23,10 @@ export default function AdminRootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={manrope.variable}>
-      <body className="admin-body">{children}</body>
+      <body className="admin-body">
+        {children}
+        <PushSetup />
+      </body>
     </html>
   );
 }

@@ -64,6 +64,14 @@ env:
     value: info@nexolmedia.com
     availability: [RUNTIME]
 
+  # --- Web Push (VAPID) ---
+  - variable: NEXT_PUBLIC_VAPID_PUBLIC_KEY
+    value: BBuUkqT3C2n2IpW7zKykmcKvAalOw8nFG0ljh-vRr0D1T-lDOCNm5YO8bpC6bWVil09TqSNOgmOKAcgTULoB6HE
+    availability: [BUILD, RUNTIME]
+  - variable: VAPID_PRIVATE_KEY
+    secret: VAPID_PRIVATE_KEY
+    availability: [RUNTIME]
+
   # --- Secrets (Secret Manager; values never committed) ---
   - variable: FIREBASE_SERVICE_ACCOUNT_KEY
     secret: FIREBASE_SERVICE_ACCOUNT_KEY

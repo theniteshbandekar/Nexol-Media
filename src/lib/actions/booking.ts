@@ -282,6 +282,27 @@ export async function createBooking(
     }
   }
 
+  // Push notification to admin device(s).
+  try {
+    const { hasVapidCredentials, sendAdminPush } = await import("@/lib/web-push");
+    if (hasVapidCredentials()) {
+      const { getSubs, deleteSub } = await import("@/lib/push-subscriptions");
+      const subs = await getSubs();
+      await Promise.all(
+        subs.map(async (sub) => {
+          const result = await sendAdminPush(sub, {
+            title: "New Booking",
+            body: `${payload.name.trim()} — ${formatHuman(payload.startISO)}`,
+            url: "/admin/bookings",
+          });
+          if (result.gone) await deleteSub(sub.endpoint);
+        })
+      );
+    }
+  } catch (err) {
+    console.error("[booking] push notification failed:", err);
+  }
+
   return { ok: true, meetLink: inserted.meetLink };
 }
 

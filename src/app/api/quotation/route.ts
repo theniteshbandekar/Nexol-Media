@@ -4,8 +4,6 @@ import { clientIp, rateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, "&amp;")
@@ -50,6 +48,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, simulated: true });
     }
 
+    const resend = new Resend(process.env.RESEND_API_KEY);
     const safeName = escapeHtml(name.trim());
     const fromAddress =
       process.env.RESEND_FROM_ADDRESS ?? "Nexol Media <noreply@nexolmedia.com>";

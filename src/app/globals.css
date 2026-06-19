@@ -206,7 +206,13 @@
     -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
     overflow-x: hidden;
+    scrollbar-width: none;
   }
+  html::-webkit-scrollbar { display: none; }
+  body {
+    scrollbar-width: none;
+  }
+  body::-webkit-scrollbar { display: none; }
   body {
     margin: 0;
     background:
@@ -763,8 +769,7 @@
   transition: gap var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out);
 }
 .service-explore:hover { gap: 16px; }
-.service-explore svg { width: 14px; height: 14px; transition: transform var(--dur-base) var(--ease-out); }
-.service-explore:hover svg { transform: translateX(6px); }
+.service-explore svg { width: 14px; height: 14px; }
 
 /* REEL STACK (vertical 9:16) */
 .reel-stack {
@@ -1743,11 +1748,14 @@
 }
 
 @media (max-width: 760px) {
-  .hero { min-height: max(calc(78vh - var(--header-h)), 460px); }
+  .hero { min-height: 0; padding-top: 56px; padding-bottom: 56px; }
   .hero h1 { font-size: clamp(56px, 14vw, 96px); }
   .one-liner { font-size: 13px; bottom: 28px; padding: 0 24px; }
   .scroll-cue { display: none; }
   .section, .services, .vsl { padding-left: 24px; padding-right: 24px; }
+  .section      { padding-top: 60px; padding-bottom: 60px; }
+  .services     { padding-top: 48px; padding-bottom: 80px; }
+  .testimonials { padding: 60px 24px; }
   .vsl { padding-top: 40px; }
   /* Case studies — mobile clearance (main already pads --header-h) */
   .page-header { padding: 44px 24px 48px; }

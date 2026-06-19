@@ -133,7 +133,7 @@
   color: var(--accent-fg);
 }
 .service-row:hover .arrow svg {
-  transform: translateX(6px);
+  transform: rotate(45deg);
 }
 
 .tag-pill {
@@ -674,6 +674,13 @@ details.svc-faq-item[open] .svc-faq-icn {
   border-color: var(--accent);
   color: var(--accent-fg);
 }
+@keyframes faq-reveal {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+details.svc-faq-item[open] .svc-faq-ans {
+  animation: faq-reveal 0.28s var(--ease-out) both;
+}
 .svc-faq-ans {
   margin-top: 16px;
   padding-right: 56px;
@@ -712,7 +719,7 @@ details.svc-faq-item[open] .svc-faq-icn {
     height: 44px;
   }
   .service-row:hover { padding-left: 12px; }
-  .trust-stats { grid-template-columns: 1fr; }
+  .trust-stats { grid-template-columns: 1fr; padding-top: 48px; padding-bottom: 48px; }
   .trust-stats > div { border-right: none; border-bottom: 1px solid var(--border); }
   .trust-stats > div:last-child { border-bottom: none; }
   .cta-banner { padding: 48px 24px; margin-top: 64px; }

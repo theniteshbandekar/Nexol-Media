@@ -761,8 +761,11 @@
   .archive-row .cat { display: none; }
 }
 @media (max-width: 760px) {
-  .blog-page { padding-left: 24px; padding-right: 24px; }
+  .blog-page { padding-left: 24px; padding-right: 24px; padding-bottom: 56px; }
   .blog-header { padding: 56px 0 32px; }
+  .featured-row { padding-top: 28px; padding-bottom: 28px; }
+  .grid-section { padding-top: 28px; padding-bottom: 20px; }
+  .archive-section { padding-top: 40px; padding-bottom: 20px; }
   .blog-filters { flex-direction: column; align-items: stretch; }
   .search-wrap { max-width: 100%; }
   .featured-post .body { padding: 22px 24px; }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { ContactBookingCard } from "@/components/contact-booking-card";
+import { QuotationRequestCard } from "@/components/quotation-request-card";
 import { JsonLd } from "@/components/json-ld";
 import { RouteHidden } from "@/components/route-hidden";
 import {
@@ -113,16 +114,14 @@ export default async function ContactPage() {
     <div className="contact-page">
       <JsonLd schema={faqSchema(faqs)} />
 
-      <section className="ct-main ct-main-top" aria-label="Book a call">
-        <div
-          className="ct-grid-solo"
-          style={{ maxWidth: 520, margin: "0 auto" }}
-        >
+      <section className="ct-main ct-main-top" aria-label="Contact options">
+        <div className="ct-grid">
           <ContactBookingCard
             initialDate={initialDate}
             initialSlots={initialSlots}
             initialConfigured={initialConfigured}
           />
+          <QuotationRequestCard />
         </div>
       </section>
 

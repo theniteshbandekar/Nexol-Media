@@ -804,6 +804,13 @@ details.faq-item[open] summary .icn {
   color: var(--accent-fg);
 }
 details.faq-item summary:hover .icn { border-color: var(--gray-400); }
+@keyframes faq-reveal {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+details.faq-item[open] .ans {
+  animation: faq-reveal 0.28s var(--ease-out) both;
+}
 details.faq-item .ans {
   margin-top: 16px;
   padding-right: 56px;
@@ -821,6 +828,9 @@ details.faq-item .ans {
   .ct-strip-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 760px) {
+  .ct-main  { padding-bottom: 48px; }
+  .ct-strip { padding-bottom: 48px; }
+  .ct-faq   { padding-bottom: 72px; }
   .ct-header { padding-top: 64px; }
   .ct-form { padding: 24px 20px 28px; }
   .ct-card-head { padding: 24px 20px 16px; }

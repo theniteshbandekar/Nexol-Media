@@ -3,14 +3,24 @@
 import { useEffect, useState } from "react";
 import { savePushSubscription } from "@/lib/actions/push-subscription";
 
-function urlBase64ToUint8Array(base64: string): Uint8Array {
-  const pad = "=".repeat((4 - (base64.length % 4)) % 4);
-  const b64 = (base64 + pad).replace(/-/g, "+").replace(/_/g, "/");
-  const raw = atob(b64);
-  return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
+type State = "idle" | "prompt" | "subscribed" | "denied" | "unsupported";
+
+async function subscribe(reg: ServiceWorkerRegistration): Promise<PushSubscription | null> {
+  const key = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  if (!key) return null;
+  // Browsers accept the base64url VAPID public key as a plain string.
+  return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
 }
 
-type State = "idle" | "prompt" | "subscribed" | "denied" | "unsupported";
+async function persistSub(sub: PushSubscription): Promise<void> {
+  const json = sub.toJSON();
+  if (json.endpoint && json.keys?.p256dh && json.keys?.auth) {
+    await savePushSubscription({
+      endpoint: json.endpoint,
+      keys: { p256dh: json.keys.p256dh, auth: json.keys.auth },
+    });
+  }
+}
 
 export function PushSetup() {
   const [state, setState] = useState<State>("idle");
@@ -25,24 +35,11 @@ export function PushSetup() {
       return;
     }
     if (Notification.permission === "granted") {
-      // Re-register SW silently in case it was cleared.
       navigator.serviceWorker.register("/sw.js").then(async (reg) => {
         const existing = await reg.pushManager.getSubscription();
         if (!existing) {
-          const key = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-          if (key) {
-            const sub = await reg.pushManager.subscribe({
-              userVisibleOnly: true,
-              applicationServerKey: urlBase64ToUint8Array(key),
-            });
-            const json = sub.toJSON();
-            if (json.endpoint && json.keys?.p256dh && json.keys?.auth) {
-              await savePushSubscription({
-                endpoint: json.endpoint,
-                keys: { p256dh: json.keys.p256dh, auth: json.keys.auth },
-              });
-            }
-          }
+          const sub = await subscribe(reg);
+          if (sub) await persistSub(sub);
         }
       });
       setState("subscribed");
@@ -59,23 +56,9 @@ export function PushSetup() {
     try {
       const reg = await navigator.serviceWorker.register("/sw.js");
       const permission = await Notification.requestPermission();
-      if (permission !== "granted") {
-        setState("denied");
-        return;
-      }
-      const key = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-      if (!key) return;
-      const sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(key),
-      });
-      const json = sub.toJSON();
-      if (json.endpoint && json.keys?.p256dh && json.keys?.auth) {
-        await savePushSubscription({
-          endpoint: json.endpoint,
-          keys: { p256dh: json.keys.p256dh, auth: json.keys.auth },
-        });
-      }
+      if (permission !== "granted") { setState("denied"); return; }
+      const sub = await subscribe(reg);
+      if (sub) await persistSub(sub);
       setState("subscribed");
     } catch (err) {
       console.error("[push-setup]", err);

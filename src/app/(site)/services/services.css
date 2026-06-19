@@ -133,7 +133,7 @@
   color: var(--accent-fg);
 }
 .service-row:hover .arrow svg {
-  transform: rotate(-45deg);
+  transform: translateX(6px);
 }
 
 .tag-pill {

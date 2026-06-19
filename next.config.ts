@@ -32,7 +32,7 @@ const securityHeaders = [
     key: "Permissions-Policy",
     value: "camera=(), microphone=(), geolocation=(), browsing-topics=()",
   },
-  { key: "Content-Security-Policy-Report-Only", value: CSP },
+  { key: "Content-Security-Policy", value: CSP },
   // HSTS only in production (it has no effect over plain-HTTP localhost and
   // would otherwise pin a dev cert).
   ...(isProd

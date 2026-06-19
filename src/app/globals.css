@@ -763,7 +763,8 @@
   transition: gap var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out);
 }
 .service-explore:hover { gap: 16px; }
-.service-explore svg { width: 14px; height: 14px; }
+.service-explore svg { width: 14px; height: 14px; transition: transform var(--dur-base) var(--ease-out); }
+.service-explore:hover svg { transform: translateX(6px); }
 
 /* REEL STACK (vertical 9:16) */
 .reel-stack {

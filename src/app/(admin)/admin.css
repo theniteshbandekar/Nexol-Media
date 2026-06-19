@@ -492,6 +492,8 @@
   gap: 10px;
 }
 .adm-btn {
+  display: inline-flex;
+  align-items: center;
   height: 38px;
   padding: 0 20px;
   border: none;
@@ -500,6 +502,7 @@
   color: var(--accent-fg);
   font-weight: 700;
   font-size: 14px;
+  text-decoration: none;
   cursor: pointer;
 }
 .adm-btn:disabled {

@@ -1767,3 +1767,16 @@
   .story { padding: 16px 24px 80px; }
   .next-cta { padding: 0 24px 80px; }
 }
+
+@media (max-width: 540px) {
+  /* Stack bento-3 and bento-4 to full width on small phones */
+  .bento-3,
+  .bento-4 { grid-column: span 6; }
+
+  /* Tighten card internal padding */
+  .bento-text { padding: 20px 20px 18px; gap: 14px; }
+
+  /* Scale quote text down */
+  .bento-text.featured .quote { font-size: 18px; }
+  .bento-text .quote          { font-size: 15px; }
+}

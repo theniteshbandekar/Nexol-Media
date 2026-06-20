@@ -115,6 +115,15 @@ export default async function ContactPage() {
       <JsonLd schema={faqSchema(faqs)} />
 
       <section className="ct-main ct-main-top" aria-label="Contact options">
+        {/* Mobile-only jump links — hidden on desktop via CSS */}
+        <div className="ct-mobile-nav" aria-label="Jump to section">
+          <a href="#book" className="ct-mobile-nav-btn ct-mobile-nav-btn--primary">
+            Book a Call
+          </a>
+          <a href="#quotation" className="ct-mobile-nav-btn">
+            Request a Quotation
+          </a>
+        </div>
         <div className="ct-grid">
           <ContactBookingCard
             initialDate={initialDate}

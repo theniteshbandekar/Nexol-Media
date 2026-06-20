@@ -615,3 +615,149 @@
   margin-top: 10px;
   padding-top: 10px;
 }
+
+/* ── Push bell ───────────────────────────────────────────────────────── */
+.push-bell {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  color: var(--gray-500);
+  cursor: default;
+}
+.push-bell--subscribed { color: var(--adm-accent, #D6F23A); }
+.push-bell--denied     { color: var(--gray-700); }
+.push-bell--prompt     { color: var(--gray-400); cursor: pointer; }
+.push-bell--prompt:hover { background: rgba(255, 255, 255, 0.08); }
+
+/* ── Mobile top bar (hidden on desktop) ─────────────────────────────── */
+.admin-topbar {
+  display: none;
+}
+.admin-drawer-backdrop {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* Top bar */
+  .admin-topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    height: 52px;
+    padding: 0 12px;
+    background: var(--gray-950);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .admin-brand-mobile {
+    flex: 1;
+    font-weight: 700;
+    font-size: 15px;
+    color: #fff;
+    text-align: center;
+  }
+
+  /* Hamburger button */
+  .admin-hamburger {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 36px;
+    height: 36px;
+    padding: 8px 9px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 6px;
+    flex: none;
+  }
+  .admin-hamburger:hover { background: rgba(255, 255, 255, 0.08); }
+  .hb-bar {
+    display: block;
+    width: 18px;
+    height: 2px;
+    background: #fff;
+    border-radius: 2px;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    transform-origin: center;
+  }
+  .admin-hamburger[aria-expanded="true"] .hb-bar:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+  }
+  .admin-hamburger[aria-expanded="true"] .hb-bar:nth-child(2) {
+    opacity: 0;
+  }
+  .admin-hamburger[aria-expanded="true"] .hb-bar:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
+  }
+
+  /* Drawer backdrop */
+  .admin-drawer-backdrop {
+    display: block;
+    position: fixed;
+    inset: 52px 0 0 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 100;
+  }
+
+  /* Shell becomes single column */
+  .admin-shell {
+    grid-template-columns: 1fr;
+    min-height: calc(100dvh - 52px);
+  }
+
+  /* Sidebar becomes a slide-out drawer */
+  .admin-sidebar {
+    position: fixed;
+    top: 52px;
+    left: 0;
+    bottom: 0;
+    width: 260px;
+    max-width: 82vw;
+    transform: translateX(-100%);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 150;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 16px 12px 32px;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .admin-sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  /* Hide the desktop brand inside the drawer — topbar shows it */
+  .admin-brand { display: none; }
+
+  /* Main content full width, less padding */
+  .admin-main {
+    padding: 20px 16px 80px;
+  }
+
+  /* Save bar spans full width on mobile */
+  .adm-savebar {
+    left: 0;
+    padding: 12px 16px;
+  }
+
+  /* Stack two-col rows on mobile */
+  .adm-row {
+    grid-template-columns: 1fr;
+  }
+
+  /* Editors max-width unrestricted on small screens */
+  .adm-editor {
+    max-width: 100%;
+    padding-bottom: 80px;
+  }
+}

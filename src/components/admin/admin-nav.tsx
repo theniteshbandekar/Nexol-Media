@@ -19,7 +19,7 @@ function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(href + "/");
 }
 
-export function AdminNav({ groups }: { groups: AdminNavGroup[] }) {
+export function AdminNav({ groups, onNavigate }: { groups: AdminNavGroup[]; onNavigate?: () => void }) {
   const pathname = usePathname();
 
   return (
@@ -33,6 +33,7 @@ export function AdminNav({ groups }: { groups: AdminNavGroup[] }) {
                 <Link
                   key={n.href}
                   href={n.href}
+                  onClick={onNavigate}
                   className={
                     isActive(pathname, n.href)
                       ? "admin-navlink active"

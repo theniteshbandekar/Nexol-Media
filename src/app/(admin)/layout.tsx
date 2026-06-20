@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 
-import { PushSetup } from "@/components/admin/push-setup";
 import "../globals.css";
 import "./admin.css";
 
@@ -25,7 +24,6 @@ export default function AdminRootLayout({
     <html lang="en" className={manrope.variable}>
       <body className="admin-body">
         {children}
-        <PushSetup />
       </body>
     </html>
   );

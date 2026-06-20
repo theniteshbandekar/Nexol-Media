@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { getCurrentUser, type UserRole } from "@/lib/firebase/auth";
-import { LogoutButton } from "@/components/admin/logout-button";
-import { AdminNav } from "@/components/admin/admin-nav";
+import { AdminShell } from "@/components/admin/admin-shell";
 
 export type NavItem = {
   href: string;
@@ -55,23 +54,16 @@ export default async function ProtectedAdminLayout({
   if (!user || !user.role) redirect("/admin/login");
 
   const role = user.role;
-  const groups = NAV_GROUPS.map(group => ({
-    ...group,
-    items: group.items.filter((n) => n.roles.includes(role))
-  })).filter(group => group.items.length > 0);
+  const groups = NAV_GROUPS.map((group) => ({
+    title: group.title,
+    items: group.items
+      .filter((n) => n.roles.includes(role))
+      .map(({ href, label, ready }) => ({ href, label, ready })),
+  })).filter((group) => group.items.length > 0);
 
   return (
-    <div className="admin-shell">
-      <aside className="admin-sidebar">
-        <div className="admin-brand">Nexol Admin</div>
-        <AdminNav groups={groups} />
-        <div className="admin-user">
-          <span className="email">{user.email}</span>
-          <span className="admin-role">{user.role}</span>
-          <LogoutButton />
-        </div>
-      </aside>
-      <main className="admin-main">{children}</main>
-    </div>
+    <AdminShell groups={groups} email={user.email ?? ""} role={role}>
+      {children}
+    </AdminShell>
   );
 }

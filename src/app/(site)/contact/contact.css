@@ -861,10 +861,11 @@ details.faq-item .ans {
   border-radius: var(--r-xl);
   background: var(--white);
   width: min(540px, calc(100vw - 32px));
-  max-height: calc(100vh - 64px);
+  max-height: calc(100dvh - 64px);
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
   color: var(--fg);
   font-family: var(--font-sans);
+  margin: auto;
 }
 .bk-dialog::backdrop {
   background: rgba(15, 15, 18, 0.55);
@@ -873,7 +874,7 @@ details.faq-item .ans {
 .bk-dialog form {
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 64px);
+  max-height: calc(100dvh - 64px);
 }
 .bk-dialog .bk-head {
   padding: 24px 28px 16px;

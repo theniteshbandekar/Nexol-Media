@@ -85,6 +85,14 @@ env:
   - variable: GOOGLE_OAUTH_REFRESH_TOKEN
     secret: GOOGLE_OAUTH_REFRESH_TOKEN
     availability: [RUNTIME]
+  # --- Cron secret (protects /api/cron/reminder) ---
+  # Generate: openssl rand -hex 32
+  # Store:    firebase apphosting:secrets:set CRON_SECRET
+  # Also add the same value to GitHub repo Settings → Secrets → Actions → CRON_SECRET
+  - variable: CRON_SECRET
+    secret: CRON_SECRET
+    availability: [RUNTIME]
+
   # RESEND_API_KEY and RESEND_AUDIENCE_ID are intentionally omitted for now — they
   # are empty in .env.local (Resend not configured yet). Referencing a versionless
   # secret would fail the rollout. email.ts no-ops gracefully without them; add both

@@ -94,7 +94,7 @@ export async function adminListBookings(): Promise<AdminBooking[]> {
   const snap = await getAdminDb().collection(COLLECTIONS.bookingRequests).get();
   return snap.docs
     .map((d) => ({ id: d.id, ...(d.data() as Omit<AdminBooking, "id">) }))
-    .sort((a, b) => (b.bookedAt ?? "").localeCompare(a.bookedAt ?? ""));
+    .sort((a, b) => (b.startsAt ?? "").localeCompare(a.startsAt ?? ""));
 }
 
 export type AdminUser = { uid: string; email: string | null; role: UserRole | null };

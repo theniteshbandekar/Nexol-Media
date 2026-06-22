@@ -28,12 +28,16 @@ export async function GET(req: NextRequest) {
 
   const snap = await getAdminDb()
     .collection(COLLECTIONS.bookingRequests)
+    .where("status", "==", "confirmed")
     .where("startsAt", ">=", windowStart)
     .where("startsAt", "<=", windowEnd)
     .get();
 
-  // Filter out bookings that already received a reminder.
-  const due = snap.docs.filter((d) => !d.data().reminderSentAt);
+  // Only bookings with a real Meet link and no prior reminder.
+  const due = snap.docs.filter((d) => {
+    const data = d.data();
+    return data.meetLink && !data.reminderSentAt;
+  });
   if (due.length === 0) {
     return NextResponse.json({ reminded: 0 });
   }

@@ -1,16 +1,24 @@
 import Link from "next/link";
 
-import { adminListBlogPosts } from "@/lib/firebase/admin-content";
+import { adminListAuthors, adminListBlogPosts } from "@/lib/firebase/admin-content";
+import { BlogImportBtn } from "@/components/admin/blog-import-btn";
 
 export default async function AdminBlogListPage() {
-  const posts = await adminListBlogPosts();
+  const [posts, authors] = await Promise.all([
+    adminListBlogPosts(),
+    adminListAuthors(),
+  ]);
+
   return (
     <div className="adm-editor">
-      <div className="adm-list-head">
+      <div className="adm-list-head" style={{ flexWrap: "wrap", gap: 8 }}>
         <h1>Blog posts</h1>
-        <Link className="adm-btn" href="/admin/blog/new">
-          + New post
-        </Link>
+        <div style={{ display: "flex", gap: 8, marginLeft: "auto" }}>
+          <BlogImportBtn authors={authors} />
+          <Link className="adm-btn" href="/admin/blog/new">
+            + New post
+          </Link>
+        </div>
       </div>
       <div className="adm-list">
         {posts.map((p) => (

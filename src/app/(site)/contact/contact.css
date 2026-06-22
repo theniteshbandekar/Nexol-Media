@@ -845,6 +845,8 @@ details.faq-item .ans {
   .ct-slots,
   .booking .foot { padding-left: 20px; padding-right: 20px; }
   .booking .specs { grid-template-columns: 1fr; }
+  /* FAQ — remove desktop indent that wastes width on phones */
+  details.faq-item .ans { padding-right: 16px; }
 
   .ct-mobile-nav {
     display: flex;
@@ -879,6 +881,11 @@ details.faq-item .ans {
 }
 @media (max-width: 540px) {
   .ct-strip-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  /* Mini-calendar — tighter gap gives ~3px more per cell on small phones */
+  .mini-cal-grid     { gap: 2px; }
+  .mini-cal-grid .dh { font-size: 8.5px; }
 }
 
 /* ============ Single-card booking layout ============ */

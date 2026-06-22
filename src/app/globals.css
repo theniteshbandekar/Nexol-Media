@@ -1757,6 +1757,15 @@
   .services     { padding-top: 48px; padding-bottom: 80px; }
   .testimonials { padding: 60px 24px; }
   .vsl { padding-top: 40px; }
+  /* Bento testimonials — flex removes grid-auto-rows height constraint */
+  .bento                      { display: flex; flex-direction: column; }
+  .bento-video                { min-height: 220px; }
+  .bento-text                 { padding: 20px 20px 18px; gap: 14px; }
+  .bento-text.featured .quote { font-size: 18px; }
+  .bento-text .quote          { font-size: 15px; }
+  /* VSL play button — 96px is >50% of the 184px-tall player on phones */
+  .vsl-play     { width: 68px; height: 68px; }
+  .vsl-play svg { width: 26px; height: 26px; }
   /* Case studies — mobile clearance (main already pads --header-h) */
   .page-header { padding: 44px 24px 48px; }
   .cases { padding: 16px 24px 96px; }
@@ -1769,14 +1778,9 @@
 }
 
 @media (max-width: 540px) {
-  /* Stack bento-3 and bento-4 to full width on small phones */
-  .bento-3,
-  .bento-4 { grid-column: span 6; }
-
-  /* Tighten card internal padding */
-  .bento-text { padding: 20px 20px 18px; gap: 14px; }
-
-  /* Scale quote text down */
-  .bento-text.featured .quote { font-size: 18px; }
-  .bento-text .quote          { font-size: 15px; }
+  /* Footer — single column on phones (2-col at 147px each is cramped) */
+  .footer-grid     { grid-template-columns: 1fr; gap: 24px; }
+  /* VSL meta bar — tighten positioning and font on narrow viewports */
+  .vsl-meta        { left: 16px; right: 16px; bottom: 16px; }
+  .vsl-meta .title { font-size: 14px; }
 }

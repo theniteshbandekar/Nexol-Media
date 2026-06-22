@@ -503,3 +503,8 @@
   .keep-reading { margin-top: 64px; }
   .keep-reading .grid { grid-template-columns: 1fr; }
 }
+@media (max-width: 540px) {
+  /* Better reading comfort on small phones; drop-cap scales with body size */
+  .post-body { font-size: 16px; }
+  .drop-cap::first-letter { font-size: 3.2em; }
+}
